@@ -52,7 +52,73 @@
 > 노션 링크, 한글 문서, pdf 파일, 구글 스프레드 시트 등...
 
 #### 3.4. 디렉토리 구조
-> 위 레포지토리의 디렉토리 구조를 설명하세요.
+
+LeakCare는 Next.js 기반 웹서비스 구조로 설계하며, 화면 페이지, 백엔드 API Route, AI·검색 API 연동 로직, 개인정보 마스킹 유틸리티를 역할별로 분리한다.  
+API 키와 민감정보는 GitHub에 업로드하지 않고 `.env.local` 및 배포 환경변수로 관리한다.
+
+```text
+LeakCare/
+├── public/                         # 로고, 아이콘, 예시 이미지 등 정적 파일
+│   ├── images/                     # 서비스 소개 이미지, 예시 화면 이미지
+│   └── samples/                    # 시연용 샘플 유출 통지문 자료
+│
+├── src/                            # 소스 코드
+│   ├── app/                        # Next.js App Router 기반 페이지
+│   │   ├── page.tsx                # 메인 화면
+│   │   ├── analyze/                # 유출 통지문 분석 화면
+│   │   │   └── page.tsx
+│   │   ├── result/                 # 분석 결과 화면
+│   │   │   └── page.tsx
+│   │   └── suspicious/             # 의심 문자 분석 화면
+│   │       └── page.tsx
+│   │
+│   ├── api/                        # 백엔드 API Route
+│   │   ├── analyze/                # 유출 통지문 AI 분석 API
+│   │   ├── search/                 # 관련 기사·공식 공지 검색 API
+│   │   ├── suspicious/             # 의심 문자 분석 API
+│   │   └── report/                 # 공유문·신고용 요약문 생성 API
+│   │
+│   ├── components/                 # 공통 UI 컴포넌트
+│   │   ├── InputBox.tsx            # 유출 통지문 입력창
+│   │   ├── RiskCard.tsx            # 위험도 표시 카드
+│   │   ├── Checklist.tsx           # 대응 체크리스트
+│   │   ├── EvidenceList.tsx        # 관련 기사·공지 근거 목록
+│   │   └── ResultSummary.tsx       # 분석 결과 요약 영역
+│   │
+│   ├── lib/                        # 외부 API 연동 및 핵심 로직
+│   │   ├── aiClient.ts             # OpenAI 또는 Gemini API 호출
+│   │   ├── searchClient.ts         # 네이버 검색 API 또는 Google 검색 API 호출
+│   │   ├── promptBuilder.ts        # AI 분석 프롬프트 생성
+│   │   ├── riskAnalyzer.ts         # 위험도 점수화 로직
+│   │   └── reportGenerator.ts      # 공유문·신고용 요약문 생성
+│   │
+│   ├── utils/                      # 유틸리티 함수
+│   │   ├── masking.ts              # 전화번호, 이메일, 주소 등 개인정보 마스킹
+│   │   ├── validators.ts           # 입력값 검증
+│   │   └── formatters.ts           # 날짜, 결과 문구 포맷팅
+│   │
+│   ├── data/                       # 테스트 및 시연용 데이터
+│   │   ├── sampleNotices.ts        # 샘플 유출 통지문
+│   │   ├── sampleMessages.ts       # 샘플 의심 문자
+│   │   └── riskRules.ts            # 유출 항목별 위험도 기준
+│   │
+│   ├── styles/                     # 전역 스타일 및 화면별 CSS
+│   │   └── globals.css
+│   │
+│   └── types/                      # TypeScript 타입 정의
+│       ├── analysis.ts             # AI 분석 결과 타입
+│       ├── search.ts               # 검색 결과 타입
+│       └── report.ts               # 요약문·공유문 타입
+│
+├── .env.example                    # 환경변수 예시 파일, 실제 API 키 제외
+├── .gitignore                      # Git 업로드 제외 파일 설정
+├── package.json                    # 프로젝트 의존성 및 실행 스크립트
+├── next.config.js                  # Next.js 설정
+├── README.md                       # 프로젝트 소개 및 실행 방법
+└── vercel.json                     # Vercel 배포 설정
+```
+
+> 실제 API 키가 포함된 `.env.local`은 GitHub에 업로드하지 않으며, 저장소에는 `.env.example`만 포함한다.
 
 #### 3.5 AI 도구 활용
 > AI 도구를 어떤 단계에서 어떻게 활용했는지, 어떤 성과가 도출되었는지 기술해주세요.
