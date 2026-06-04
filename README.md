@@ -201,7 +201,7 @@ LeakCare/
     <a href="mailto:강경민이메일">강경민이메일</a>
   </td>
   <td align="center">
-    <a href="mailto:류태우이메일">류태우이메일</a>
+    <a href="mailto:rtw0507@naver.com">rtw0507@naver.com</a>
   </td>
 </tr>
 </table>
