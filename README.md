@@ -179,7 +179,6 @@ LeakCare/
 └── .gitignore
 ```
 
-> 실제 API 키가 포함된 `.env.local`은 GitHub에 업로드하지 않으며, 저장소에는 `.env.example`만 포함한다.
 
 ### 3.4 AI 도구 활용
 
