@@ -158,25 +158,42 @@ LeakCare는 단순 조회·신고 중심의 기존 서비스와 달리 개인정
   - 기관 상담이나 신고 시 활용할 수 있는 요약문을 생성한다.
   - 생성된 안내문은 복사하거나 PDF로 저장할 수 있으며, 필요 시 입력 내용을 초기화할 수 있다.
 
-### 3.3. 디렉토리 구조
+### 3.3 디렉토리 구조
 
-LeakCare는 Next.js 기반 웹서비스 구조로 설계하며, 화면 페이지, 백엔드 API Route, AI·검색 API 연동 로직, 개인정보 마스킹 유틸리티를 역할별로 분리한다.  
+LeakCare는 Next.js 기반 웹서비스 구조로 설계하며, 화면 페이지, API Route, 외부 API 연동 로직, 개인정보 보호 유틸리티를 역할별로 분리한다.  
 API 키와 민감정보는 GitHub에 업로드하지 않고 `.env.local` 및 배포 환경변수로 관리한다.
 
 ```text
 LeakCare/
-├── public/                     # 로고, 예시 이미지 등 정적 파일
+├── public/                    # 로고, 예시 이미지 등 정적 파일
+│
+├── docs/                      # 시스템 구성도, 발표자료, 시연 자료
+│
 ├── src/
-│   ├── app/                    # 메인 페이지 및 전역 스타일
-│   ├── components/             # 입력창, 위험도 카드, 체크리스트 등 UI 컴포넌트
-│   ├── data/                   # 시연용 Mock 분석 결과 데이터
-│   ├── utils/                  # Mock 분석 함수 및 보조 함수
-│   └── types/                  # 분석 결과 타입 정의
-├── docs/                       # 시스템 구성도, 발표자료, 시연 자료
-├── README.md
-├── package.json
-├── .env.example
-└── .gitignore
+│   ├── app/                   # Next.js App Router 기반 페이지 및 API Route
+│   │   ├── page.tsx           # 시작 페이지
+│   │   ├── banner/            # 서비스 배너 및 이용 안내 페이지
+│   │   ├── leak/              # 유출 안내문 분석 페이지
+│   │   ├── sms/               # 의심 문자 분석 페이지
+│   │   └── api/               # AI 분석, 검색, OCR, 보고서 생성 API Route
+│   │
+│   ├── components/            # 입력창, 위험도 카드, 체크리스트 등 공통 UI 컴포넌트
+│   │
+│   ├── lib/                   # Gemini API, Google 검색 API, OCR, 보고서 생성 연동 로직
+│   │
+│   ├── utils/                 # 개인정보 마스킹, 입력값 검증, 결과 문구 포맷팅
+│   │
+│   ├── data/                  # 위험도 기준, 우선순위 분류 기준, 피싱 패턴 데이터
+│   │
+│   └── types/                 # 분석 결과, 검색 결과, 위험도, 보고서 타입 정의
+│
+├── .env.example               # 환경변수 예시 파일, 실제 API 키 제외
+├── .gitignore                 # Git 업로드 제외 파일 설정
+├── package.json               # 프로젝트 의존성 및 실행 스크립트
+├── package-lock.json          # npm 의존성 버전 고정 파일
+├── next.config.js             # Next.js 설정
+└── README.md                  # 프로젝트 소개 및 실행 방법
+
 ```
 
 
