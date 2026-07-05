@@ -41,12 +41,24 @@ export const mockResult: LeakAnalysisResult = {
       priority: "즉시 조치",
       title: "비밀번호 변경",
       description: "동일한 비밀번호를 사용하는 사이트의 비밀번호를 변경하세요.",
+      link: {
+        label: "바로가기",
+        url: "https://www.sktelecom.com",
+        description: "공식 홈페이지에서 비밀번호 변경 경로를 확인하세요.",
+  
+
+      },
     },
     {
       id: "enable-2fa",
       priority: "즉시 조치",
       title: "2단계 인증 설정",
       description: "이메일, 통신사, 금융 계정에 2단계 인증을 설정하세요.",
+      link: {
+        label: "바로가기",
+        url: "https://www.sktelecom.com",
+        description: "공식 홈페이지에서 보안 설정 경로를 확인하세요",
+      },
     },
     {
       id: "avoid-links",

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { mockResult } from "../data/mockResult";
 
 const sampleText = `개인정보 유출 안내
 
@@ -173,27 +174,28 @@ export default function LeakPage() {
                       <h4>
                         <span className="icon-dot"></span> 우선 대응 체크리스트
                       </h4>
-                      <ul className="check-list">
-                        <li>
-                          <span className="num">1</span>
-                          <span>해당 서비스의 비밀번호를 변경합니다.</span>
-                        </li>
-                        <li>
-                          <span className="num">2</span>
-                          <span>동일한 비밀번호를 사용하는 다른 사이트도 함께 변경합니다.</span>
-                        </li>
-                        <li>
-                          <span className="num">3</span>
-                          <span>보상금, 환불, 본인인증 안내는 공식 앱이나 홈페이지에서 직접 확인합니다.</span>
-                        </li>
-                        <li>
-                          <span className="num">4</span>
-                          <span>택배 사칭 문자와 고객센터 사칭 전화를 주의합니다.</span>
-                        </li>
-                        <li>
-                          <span className="num">5</span>
-                          <span>가족에게 같은 유형의 문자를 조심하라고 공유합니다.</span>
-                        </li>
+                      <ul className="check-lisk">
+                        {mockResult.checklist.map((item, index) => (
+                          <li key={`${item.id}-${index}`}>
+                            <span className="num">{index + 1}</span>
+                            <span>
+                              <strong>{item.title}</strong>
+                              <br />
+                              {item.description}
+                            </span>
+
+                            {item.link && (
+                              <a
+                              className="small-btn"
+                              href={item.link.url}
+                              target="_blank"
+                              rel="noreferrer"
+                            >
+                              바로가기
+                            </a>
+                            )}
+                          </li>
+                        ))}
                       </ul>
                     </article>
 
