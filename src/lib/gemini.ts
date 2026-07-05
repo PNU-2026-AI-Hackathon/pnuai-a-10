@@ -1,10 +1,10 @@
 import type {
-  LeakAnalysisResult,
   RiskLevel,
   SmsAnalysisResult,
 } from "../types/analysis";
 import type { NaverNewsResult } from "./googleSearch";
 import { providerLinks } from "../data/providerLinks";
+import { calculateRiskLevel } from "../data/riskCriteria";
 
 export type ExtractedKeyInfo = {
   company: string;
@@ -183,6 +183,9 @@ ${inputText}
 
   const result = await callGeminiJson<Partial<ExtractedKeyInfo>>(prompt);
 
+  const leakedItems = uniqueStringArray(result.leakedItems).map(normalizeLeakedItem);
+  const { riskLevel } = calculateRiskLevel(leakedItems);
+
   return {
     company:
       typeof result.company === "string" && result.company.trim()
@@ -192,9 +195,9 @@ ${inputText}
       typeof result.service === "string" && result.service.trim()
         ? result.service.trim()
         : undefined,
-    leakedItems: uniqueStringArray(result.leakedItems).map(normalizeLeakedItem),
+    leakedItems,
     riskTypes: uniqueStringArray(result.riskTypes),
-    riskLevel: normalizeRiskLevel(result.riskLevel),
+    riskLevel,
     reason:
       typeof result.reason === "string" && result.reason.trim()
         ? result.reason.trim()
@@ -250,7 +253,7 @@ ${evidenceText || "검색 결과 없음"}
   const result = await callGeminiJson<Partial<LeakFinalText>>(prompt);
 
   return {
-    riskLevel: normalizeRiskLevel(result.riskLevel ?? extracted.riskLevel),
+    riskLevel: extracted.riskLevel,
     riskTypes:
       result.riskTypes && result.riskTypes.length > 0
         ? uniqueStringArray(result.riskTypes)
