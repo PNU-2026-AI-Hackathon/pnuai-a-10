@@ -15,14 +15,16 @@ export default function LeakPage() {
   const [loading, setLoading] = useState(false);
   const [showResult, setShowResult] = useState(false);
   const [ocrLoading, setOcrLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
   const analyze = () => {
     if (!text.trim()) {
-      alert("유출 안내문을 입력해주세요.");
+      setErrorMessage("유출 안내문을 입력해주세요.");
       return;
     }
 
     setShowResult(false);
+    setErrorMessage("");
     setLoading(true);
 
     setTimeout(() => {
@@ -136,6 +138,16 @@ const handleImageUpload = async (file: File | undefined) => {
 
           <section className="panel">
             <div className="results">
+              {errorMessage && (
+                <div className="info-card full">
+                  <h4>
+                    <span className="icon-dot"></span>입력 오류
+                  </h4>
+                  <p>{errorMessage}</p>
+                  </div>
+              )}
+              
+              
               {loading && (
                 <div className="result-top">
                   <div>

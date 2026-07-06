@@ -10,14 +10,16 @@ export default function SmsPage() {
   const [text, setText] = useState("");
   const [loading, setLoading] = useState(false);
   const [showResult, setShowResult] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
   const analyze = () => {
     if (!text.trim()) {
-      alert("의심 문자를 입력해주세요.");
+      setErrorMessage("의심 문자를 입력해주세요.");
       return;
     }
 
     setShowResult(false);
+    setErrorMessage("");
     setLoading(true);
 
     setTimeout(() => {
@@ -30,6 +32,7 @@ export default function SmsPage() {
     setText("");
     setShowResult(false);
     setLoading(false);
+    setErrorMessage("");
   };
 
   return (
@@ -91,6 +94,14 @@ export default function SmsPage() {
 
           <section className="panel">
             <div className="results">
+              {errorMessage && (
+                <div className="info-card full">
+                  <h4>
+                    <span className="icon-dot"></span>입력 오류
+                  </h4>
+                  <p>{errorMessage}</p>
+                  </div>
+              )}
               {loading && (
                 <div className="result-top">
                   <div>
