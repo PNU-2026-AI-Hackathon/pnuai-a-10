@@ -28,6 +28,8 @@ export default function BannerPage() {
           <a href="/sms" target="_blank" rel="noopener noreferrer">
             의심 문자 분석
           </a>
+          <a href="/login" className="secondary=btn">
+            로그인</a>
         </nav>
       </header>
 
