@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { mockResult } from "../data/mockResult";
+import { extractTextFromImage } from "../../lib/ocr";
 
 const sampleText = `개인정보 유출 안내
 
@@ -13,6 +14,7 @@ export default function LeakPage() {
   const [text, setText] = useState("");
   const [loading, setLoading] = useState(false);
   const [showResult, setShowResult] = useState(false);
+  const [ocrLoading, setOcrLoading] = useState(false);
 
   const analyze = () => {
     if (!text.trim()) {
@@ -37,6 +39,22 @@ export default function LeakPage() {
 
   const showComingSoon = () => {
   alert("추후 추가할 예정입니다.");
+};
+const handleImageUpload = async (file: File | undefined) => {
+  if (!file) return;
+
+  setOcrLoading(true);
+
+  try {
+    const extractedText = await extractTextFromImage(file);
+    console.log("이미지에서 추출된 텍스트:", extractedText);
+    setText(extractedText);
+  } catch (error) {
+    console.error("OCR 처리 실패:", error);
+    alert("이미지에서 텍스트를 추출하지 못했습니다.");
+  } finally {
+    setOcrLoading(false);
+  }
 };
 
   return (
@@ -77,10 +95,25 @@ export default function LeakPage() {
                 placeholder="개인정보 유출 안내 문자, 이메일, 공지문 내용을 입력해주세요."
               />
 
-              <div className="upload-box">
-                <span>이미지 업로드 시 OCR 기능을 통해 텍스트를 추출합니다.</span>
-                <span className="upload-pill">이미지 업로드</span>
-              </div>
+              <label className="upload-box">
+                <span>
+                  {ocrLoading
+                  ? "이미지에서 텍스트를 추출하는 중입니다."
+                  : "이미지 업로드 시 ocr 기능을 통해 텍스트를 추출합니다."}
+                </span>
+
+                <span className="upload-pill">
+                  {ocrLoading ? "처리 중" : "이미지 업로드"}
+                </span>
+
+                <input
+                type="file"
+                accept="image/*"
+                hidden
+                disabled={ocrLoading}
+                onChange={(e) => handleImageUpload(e.target.files?.[0])}
+                />
+                </label>
 
               <div className="sample-row">
                 <button className="sample-btn" onClick={() => setText(sampleText)}>
