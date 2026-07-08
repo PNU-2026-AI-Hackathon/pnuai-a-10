@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { mockResult } from "../data/mockResult";
 import { extractTextFromImage } from "../../lib/ocr";
+import type { LeakAnalysisResult } from "../../types/analysis";
 
 const sampleText = `개인정보 유출 안내
 
@@ -16,27 +16,57 @@ export default function LeakPage() {
   const [showResult, setShowResult] = useState(false);
   const [ocrLoading, setOcrLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const [result, setResult] = useState<LeakAnalysisResult | null>(null);
 
-  const analyze = () => {
+  const analyze = async () => {
     if (!text.trim()) {
       setErrorMessage("유출 안내문을 입력해주세요.");
       return;
     }
 
     setShowResult(false);
+    setResult(null);
     setErrorMessage("");
     setLoading(true);
 
-    setTimeout(() => {
-      setLoading(false);
+    try {
+      const response = await fetch("/api/analyze", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          inputText: text,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "유출 안내문 분석에 실패했습니다.");
+      }
+
+      console.log("유출 안내문 분석 결과:", data);
+      setResult(data);
       setShowResult(true);
-    }, 1000);
+    } catch (error) {
+      const message =
+      error instanceof Error
+      ? error.message
+      : "분석 중 알 수 없는 오류가 발생했습니다.";
+
+      setErrorMessage(message);
+    }finally {
+      setLoading(false);
+    }
   };
 
   const reset = () => {
     setText("");
     setShowResult(false);
     setLoading(false);
+    setResult(null);
+    setErrorMessage("");
   };
 
   const showComingSoon = () => {
@@ -174,7 +204,7 @@ const handleImageUpload = async (file: File | undefined) => {
                 </div>
               )}
 
-              {showResult && (
+              {showResult && result && (
                 <>
                   <div className="result-top">
                     <div>
@@ -185,8 +215,8 @@ const handleImageUpload = async (file: File | undefined) => {
                       </p>
                     </div>
                     <div className="score-badge">
-                      <strong>78</strong>
-                      <span>주의 필요</span>
+                      <strong>{result.riskLevel}</strong>
+                      <span>위험도</span>
                     </div>
                   </div>
 
@@ -196,11 +226,11 @@ const handleImageUpload = async (file: File | undefined) => {
                         <span className="icon-dot"></span> 유출 항목
                       </h4>
                       <div className="chips">
-                        <span className="chip warning">이름</span>
-                        <span className="chip warning">전화번호</span>
-                        <span className="chip warning">이메일</span>
-                        <span className="chip warning">주소</span>
-                        <span className="chip warning">주문내역</span>
+                        {result.leakedItems.map((item) => (
+                          <span className="chip warning" key={item}>
+                            {item}
+                          </span>
+                        ))}
                       </div>
                     </article>
 
@@ -209,9 +239,11 @@ const handleImageUpload = async (file: File | undefined) => {
                         <span className="icon-dot"></span> 위험 유형
                       </h4>
                       <div className="chips">
-                        <span className="chip warning">스미싱</span>
-                        <span className="chip warning">택배 사칭</span>
-                        <span className="chip warning">환불 안내 사칭</span>
+                        {result.riskTypes.map((item) => (
+                          <span className="chip warning" key={item}>
+                            {item}
+                          </span>
+                        ))}
                       </div>
                     </article>
 
@@ -219,8 +251,8 @@ const handleImageUpload = async (file: File | undefined) => {
                       <h4>
                         <span className="icon-dot"></span> 우선 대응 체크리스트
                       </h4>
-                      <ul className="check-lisk">
-                        {mockResult.checklist.map((item, index) => (
+                      <ul className="check-list">
+                        {result.checklist.map((item, index) => (
                           <li key={`${item.id}-${index}`}>
                             <span className="num">{index + 1}</span>
                             <span>
@@ -249,10 +281,7 @@ const handleImageUpload = async (file: File | undefined) => {
                         <span className="icon-dot"></span> 가족 공유용 안내문
                       </h4>
                       <div className="message-card">
-                        개인정보 일부가 유출된 안내를 받은 상태입니다. 택배 사칭
-                        문자, 환불 안내 문자, 본인인증 요구 문자가 올 수 있으니
-                        링크를 누르지 말고 공식 홈페이지나 고객센터를 통해
-                        확인해주세요.
+                        {result.familyMessage}
                       </div>
                     </article>
 

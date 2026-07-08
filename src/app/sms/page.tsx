@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import type { SmsAnalysisResult } from "../../types/analysis";
 
 const sampleText = `[Web발신] 개인정보 유출 보상금 지급 대상자입니다.
 아래 링크에서 본인인증을 완료하면 보상금이 지급됩니다.
@@ -11,27 +12,56 @@ export default function SmsPage() {
   const [loading, setLoading] = useState(false);
   const [showResult, setShowResult] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const [result, setResult] = useState<SmsAnalysisResult | null>(null);
 
-  const analyze = () => {
+  const analyze = async () => {
     if (!text.trim()) {
       setErrorMessage("의심 문자를 입력해주세요.");
       return;
     }
 
     setShowResult(false);
+    setResult(null);
     setErrorMessage("");
     setLoading(true);
 
-    setTimeout(() => {
-      setLoading(false);
+    try {
+      const response = await fetch("/api/sms", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          inputText: text,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "의심 문자 분석에 실패했습니다.");
+      }
+
+      console.log("의심 문자 분석 결과:", data);
+      setResult(data);
       setShowResult(true);
-    }, 1000);
-  };
+    } catch (error) {
+      const message = 
+      error instanceof Error
+      ? error.message
+      : "분석 중 알 수 없는 오류가 발생했습니다.";
+
+      setErrorMessage(message);
+    } finally {
+      setLoading(false);
+    }
+    };
 
   const reset = () => {
     setText("");
     setShowResult(false);
     setLoading(false);
+    setResult(null);
     setErrorMessage("");
   };
 
@@ -128,19 +158,18 @@ export default function SmsPage() {
                 </div>
               )}
 
-              {showResult && (
+              {showResult &&  result && (
                 <>
                   <div className="result-top">
                     <div>
                       <h3>의심 문자 분석 결과</h3>
                       <p>
-                        입력된 문자는 보상금 지급과 본인인증을 요구하며 외부
-                        링크를 포함하고 있어 위험도가 높습니다.
+                        {result.reason}
                       </p>
                     </div>
                     <div className="score-badge">
-                      <strong>91</strong>
-                      <span>매우 위험</span>
+                      <strong>{result.riskLevel}</strong>
+                      <span>위험도</span>
                     </div>
                   </div>
 
@@ -161,10 +190,12 @@ export default function SmsPage() {
                         <span className="icon-dot"></span> 위험 유형
                       </h4>
                       <div className="chips">
-                        <span className="chip danger">피싱</span>
-                        <span className="chip danger">스미싱</span>
-                        <span className="chip danger">개인정보 입력 유도</span>
-                      </div>
+                          {result.riskTypes.map((item) => (
+                            <span className="chip danger" key={item}>
+                              {item}
+                            </span>
+                          ))}
+                        </div>  
                     </article>
 
                     <article className="info-card full">
@@ -172,26 +203,16 @@ export default function SmsPage() {
                         <span className="icon-dot"></span> 우선 대응 체크리스트
                       </h4>
                       <ul className="check-list">
-                        <li>
-                          <span className="num">1</span>
-                          <span>문자에 포함된 링크를 누르지 않습니다.</span>
-                        </li>
-                        <li>
-                          <span className="num">2</span>
-                          <span>이미 링크를 눌렀다면 비밀번호를 변경하고 2단계 인증을 설정합니다.</span>
-                        </li>
-                        <li>
-                          <span className="num">3</span>
-                          <span>보상금, 환불, 본인인증 안내는 공식 앱이나 홈페이지에서 직접 확인합니다.</span>
-                        </li>
-                        <li>
-                          <span className="num">4</span>
-                          <span>문자를 삭제하지 말고 필요 시 신고나 상담 자료로 보관합니다.</span>
-                        </li>
-                        <li>
-                          <span className="num">5</span>
-                          <span>가족에게 같은 유형의 문자를 조심하라고 공유합니다.</span>
-                        </li>
+                        {result.recommendedActions.map((item, index) => (
+                          <li key={`${item.id}-${index}`}>
+                            <span className="num">{index + 1}</span>
+                            <span>
+                              <strong>{item.title}</strong>
+                              <br />
+                              {item.description}
+                            </span>
+                          </li>
+                        ))}
                       </ul>
                     </article>
                   </div>
