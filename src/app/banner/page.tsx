@@ -30,6 +30,7 @@ export default function BannerPage() {
           </a>
           <a href="/login" className="secondary=btn">
             로그인</a>
+          <a href="/mypage">마이페이지</a>
         </nav>
       </header>
 
