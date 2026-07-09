@@ -1,4 +1,5 @@
 import "./globals.css";
+import ReminderBanner from "../components/ReminderBanner";
 
 export const metadata = {
   title: "LeakCare",
@@ -12,7 +13,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="ko">
-      <body>{children}</body>
+      <body>
+        <ReminderBanner />
+        {children}</body>
     </html>
   );
 }
