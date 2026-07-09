@@ -267,6 +267,12 @@ const handleImageUpload = async (file: File | undefined) => {
                               href={item.link.url}
                               target="_blank"
                               rel="noreferrer"
+                              style={{
+                                whiteSpace: "nowrap",
+                                width: "fit-content",
+                                minWidth: "88px",
+                                textAlign: "center",
+                              }}
                             >
                               바로가기
                             </a>

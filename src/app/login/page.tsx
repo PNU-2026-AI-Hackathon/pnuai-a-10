@@ -1,8 +1,21 @@
 "use client";
 
+import { createBrowserSupabaseClient } from "../../lib/supabase/client";
+
 export default function LoginPage() {
-  const showComingSoon = () => {
-    alert("추후 로그인 연동 예정입니다.");
+  const signInWithProvider = async (provider: "google" | "kakao") => {
+    const supabase = createBrowserSupabaseClient();
+
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider,
+      options: {
+        redirectTo: `${window.location.origin}/banner`,
+      },
+    });
+
+    if (error) {
+      alert(error.message);
+    }
   };
 
   return (
@@ -54,11 +67,17 @@ export default function LoginPage() {
                 gap: "12px",
               }}
             >
-              <button className="small-btn" onClick={showComingSoon}>
+              <button
+                className="small-btn"
+                onClick={() => signInWithProvider("google")}
+              >
                 Google로 로그인
               </button>
 
-              <button className="small-btn" onClick={showComingSoon}>
+              <button
+                className="small-btn"
+                onClick={() => signInWithProvider("kakao")}
+              >
                 Kakao로 로그인
               </button>
             </div>
@@ -71,8 +90,7 @@ export default function LoginPage() {
                 lineHeight: "1.6",
               }}
             >
-              현재는 로그인 화면 UI만 제공되며, 실제 소셜 로그인 연동은 추후
-              추가됩니다.
+              버튼을 누르면 Google 또는 Kakao 로그인 화면으로 이동합니다.
             </p>
           </div>
         </div>
