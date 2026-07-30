@@ -12,6 +12,15 @@ export type ExtractedKeyInfo = {
   leakedItems: string[];
   riskTypes: string[];
   riskLevel: RiskLevel;
+
+  riskScore: number;
+  baseScore: number;
+  combinationScore: number;
+  adjustmentScore: number;
+  riskReasons: string[];
+  matchedCombinationRules: string[];
+  sourceIds: number[];
+
   reason: string;
 };
 
@@ -49,20 +58,28 @@ function normalizeLeakedItem(item: string): string {
     휴대폰번호: "전화번호",
     핸드폰번호: "전화번호",
     전화: "전화번호",
+
     메일: "이메일",
     이메일주소: "이메일",
     전자우편: "이메일",
+
     거주지: "주소",
     배송지: "주소",
+
     주문정보: "주문내역",
     구매내역: "주문내역",
+
     계정ID: "계정정보",
     아이디: "계정정보",
     로그인정보: "계정정보",
+
     패스워드: "비밀번호",
+
     카드번호: "카드정보",
     신용카드정보: "카드정보",
+
     결제수단: "결제정보",
+
     주민번호: "주민등록번호",
     주민등록: "주민등록번호",
   };
@@ -135,7 +152,10 @@ async function callGeminiJson<T>(prompt: string): Promise<T> {
 
   if (!response.ok) {
     const errorText = await response.text();
-    throw new Error(`Gemini API 호출 실패: ${response.status} ${errorText}`);
+
+    throw new Error(
+      `Gemini API 호출 실패: ${response.status} ${errorText}`
+    );
   }
 
   const data = await response.json();
@@ -152,7 +172,9 @@ async function callGeminiJson<T>(prompt: string): Promise<T> {
   return parseJsonFromGemini<T>(text);
 }
 
-export async function extractKeyInfo(inputText: string): Promise<ExtractedKeyInfo> {
+export async function extractKeyInfo(
+  inputText: string
+): Promise<ExtractedKeyInfo> {
   const prompt = `
 너는 개인정보 유출 안내문을 분석하는 보안 도우미다.
 
@@ -163,7 +185,7 @@ export async function extractKeyInfo(inputText: string): Promise<ExtractedKeyInf
 {
   "company": "기업명 또는 알 수 없음",
   "service": "서비스명 또는 빈 문자열",
-  "leakedItems": ["이름", "전화번호", "이메일", "주소", "주문내역", "계정정보", "비밀번호", "결제정보", "카드정보", "생년월일", "주민등록번호"],
+  "leakedItems": ["이름", "전화번호", "이메일", "주소", "주문내역", "계정정보", "비밀번호", "결제정보", "카드정보", "계좌번호", "생년월일", "주민등록번호"],
   "riskTypes": ["스미싱", "피싱", "택배 사칭", "계정 탈취", "명의도용"],
   "riskLevel": "낮음" | "보통" | "높음",
   "reason": "위험도 판단 이유 한두 문장"
@@ -172,6 +194,9 @@ export async function extractKeyInfo(inputText: string): Promise<ExtractedKeyInf
 규칙:
 - 유출 항목은 입력문에 근거가 있을 때만 넣어라.
 - 확실하지 않으면 과장하지 마라.
+- 카드번호가 실제로 유출된 경우 "카드정보"를 넣어라.
+- 은행 계좌번호가 실제로 유출된 경우 "계좌번호"를 넣어라.
+- 결제일시, 결제금액, 결제수단 종류가 유출된 경우 "결제정보"를 넣어라.
 - riskLevel은 반드시 "낮음", "보통", "높음" 중 하나만 사용해라.
 - company를 모르면 "알 수 없음"으로 써라.
 
@@ -181,23 +206,40 @@ ${inputText}
 """
 `;
 
-  const result = await callGeminiJson<Partial<ExtractedKeyInfo>>(prompt);
+  const result =
+    await callGeminiJson<Partial<ExtractedKeyInfo>>(prompt);
 
-  const leakedItems = uniqueStringArray(result.leakedItems).map(normalizeLeakedItem);
-  const { riskLevel } = calculateRiskLevel(leakedItems);
+  const leakedItems = uniqueStringArray(result.leakedItems).map(
+    normalizeLeakedItem
+  );
+
+  const riskCalculation = calculateRiskLevel(leakedItems);
 
   return {
     company:
       typeof result.company === "string" && result.company.trim()
         ? result.company.trim()
         : "알 수 없음",
+
     service:
       typeof result.service === "string" && result.service.trim()
         ? result.service.trim()
         : undefined,
+
     leakedItems,
+
     riskTypes: uniqueStringArray(result.riskTypes),
-    riskLevel,
+
+    riskLevel: riskCalculation.riskLevel,
+    riskScore: riskCalculation.score,
+    baseScore: riskCalculation.baseScore,
+    combinationScore: riskCalculation.combinationScore,
+    adjustmentScore: riskCalculation.adjustmentScore,
+    riskReasons: riskCalculation.riskReasons,
+    matchedCombinationRules:
+      riskCalculation.matchedCombinationRules,
+    sourceIds: riskCalculation.sourceIds,
+
     reason:
       typeof result.reason === "string" && result.reason.trim()
         ? result.reason.trim()
@@ -221,7 +263,6 @@ export async function analyzeWithSearchContext(params: {
 
   const prompt = `
 너는 개인정보 유출 사고 대응을 돕는 보안 도우미다.
-
 아래 정보들을 바탕으로 최종 분석 문구를 작성해라.
 반드시 JSON만 반환해라.
 마크다운 코드블록을 쓰지 마라.
@@ -239,35 +280,44 @@ export async function analyzeWithSearchContext(params: {
 - 검색 결과가 부족하면 입력문 기준으로 판단하되, 근거가 부족하다고 명시해라.
 - 사용자가 바로 이해할 수 있게 짧고 명확하게 작성해라.
 - riskLevel은 반드시 "낮음", "보통", "높음" 중 하나만 사용해라.
+- LeakCare가 계산한 위험 수준과 점수는 변경하지 말고 설명에만 활용해라.
 
 [입력문]
 ${inputText}
 
-[1차 추출 결과]
+[1차 추출 및 LeakCare 위험도 계산 결과]
 ${JSON.stringify(extracted, null, 2)}
 
 [검색 결과]
 ${evidenceText || "검색 결과 없음"}
 `;
 
-  const result = await callGeminiJson<Partial<LeakFinalText>>(prompt);
+  const result =
+    await callGeminiJson<Partial<LeakFinalText>>(prompt);
 
   return {
+    // 최종 등급은 Gemini가 아니라 LeakCare 계산 결과를 사용합니다.
     riskLevel: extracted.riskLevel,
+
     riskTypes:
       result.riskTypes && result.riskTypes.length > 0
         ? uniqueStringArray(result.riskTypes)
         : extracted.riskTypes,
+
     reason:
       typeof result.reason === "string" && result.reason.trim()
         ? result.reason.trim()
         : extracted.reason,
+
     familyMessage:
-      typeof result.familyMessage === "string" && result.familyMessage.trim()
+      typeof result.familyMessage === "string" &&
+      result.familyMessage.trim()
         ? result.familyMessage.trim()
         : "개인정보 유출 가능성이 있어 의심 문자나 링크를 주의해 주세요.",
+
     reportSummary:
-      typeof result.reportSummary === "string" && result.reportSummary.trim()
+      typeof result.reportSummary === "string" &&
+      result.reportSummary.trim()
         ? result.reportSummary.trim()
         : `${extracted.company} 관련 개인정보 유출 안내문을 확인했습니다.`,
   };
@@ -320,10 +370,12 @@ ${inputText}
     riskLevel,
     isSmishing,
     riskTypes,
+
     reason:
       typeof result.reason === "string" && result.reason.trim()
         ? result.reason.trim()
         : "문자 내용의 링크, 요구 행동, 표현 패턴을 기준으로 위험 여부를 판단했습니다.",
+
     recommendedActions: [
       {
         id: "sms-do-not-click",
