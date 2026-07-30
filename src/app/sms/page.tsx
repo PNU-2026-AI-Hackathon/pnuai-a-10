@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { extractTextFromImage } from "../../lib/ocr";
 import type { SmsAnalysisResult } from "../../types/analysis";
 
 const sampleText = `[Web발신] 개인정보 유출 보상금 지급 대상자입니다.
@@ -11,6 +12,7 @@ export default function SmsPage() {
   const [text, setText] = useState("");
   const [loading, setLoading] = useState(false);
   const [showResult, setShowResult] = useState(false);
+  const [ocrLoading, setOcrLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [result, setResult] = useState<SmsAnalysisResult | null>(null);
 
@@ -46,16 +48,36 @@ export default function SmsPage() {
       setResult(data);
       setShowResult(true);
     } catch (error) {
-      const message = 
-      error instanceof Error
-      ? error.message
-      : "분석 중 알 수 없는 오류가 발생했습니다.";
+      const message =
+        error instanceof Error
+          ? error.message
+          : "분석 중 알 수 없는 오류가 발생했습니다.";
 
       setErrorMessage(message);
     } finally {
       setLoading(false);
     }
-    };
+  };
+
+  const handleImageUpload = async (file: File | undefined) => {
+    if (!file) return;
+
+    setOcrLoading(true);
+    setErrorMessage("");
+
+    try {
+      const extractedText = await extractTextFromImage(file);
+      console.log("이미지에서 추출된 문자:", extractedText);
+      setText(extractedText);
+      setShowResult(false);
+      setResult(null);
+    } catch (error) {
+      console.error("OCR 처리 실패:", error);
+      setErrorMessage("이미지에서 문자 내용을 추출하지 못했습니다.");
+    } finally {
+      setOcrLoading(false);
+    }
+  };
 
   const reset = () => {
     setText("");
@@ -72,10 +94,6 @@ export default function SmsPage() {
           <span className="brand-badge">L</span>
           <span>LeakCare</span>
         </a>
-
-        <button className="ghost-btn" onClick={reset}>
-          초기화
-        </button>
       </header>
 
       <section className="workspace single-workspace">
@@ -103,8 +121,33 @@ export default function SmsPage() {
                 placeholder="해킹 또는 개인정보 유출이 의심되는 문자를 입력해주세요."
               />
 
+              <label className="upload-box">
+                <span>
+                  {ocrLoading
+                    ? "이미지에서 문자 내용을 추출하는 중입니다."
+                    : "문자 화면을 캡처한 이미지를 업로드하면 텍스트를 추출합니다."}
+                </span>
+
+                <span className="upload-pill">
+                  {ocrLoading ? "처리 중" : "이미지 업로드"}
+                </span>
+
+                <input
+                  type="file"
+                  accept="image/*"
+                  hidden
+                  disabled={ocrLoading || loading}
+                  onChange={(e) =>
+                    handleImageUpload(e.target.files?.[0])
+                  }
+                />
+              </label>
+
               <div className="sample-row">
-                <button className="sample-btn" onClick={() => setText(sampleText)}>
+                <button
+                  className="sample-btn"
+                  onClick={() => setText(sampleText)}
+                >
                   의심 문자 예시 불러오기
                 </button>
               </div>
@@ -115,9 +158,25 @@ export default function SmsPage() {
                   위험도를 분석합니다.
                 </p>
 
-                <button className="primary-btn" onClick={analyze}>
-                  AI 분석하기
-                </button>
+                <div className="analyze-buttons">
+                  <button
+                    type="button"
+                    className="ghost-btn"
+                    onClick={reset}
+                    disabled={loading}
+                  >
+                    초기화
+                  </button>
+
+                  <button
+                    type="button"
+                    className="primary-btn"
+                    onClick={analyze}
+                    disabled={loading}
+                  >
+                    {loading ? "분석 중..." : "AI 분석하기"}
+                  </button>
+                </div>
               </div>
             </div>
           </section>
@@ -130,16 +189,29 @@ export default function SmsPage() {
                     <span className="icon-dot"></span>입력 오류
                   </h4>
                   <p>{errorMessage}</p>
-                  </div>
+                </div>
               )}
+
               {loading && (
                 <div className="result-top">
                   <div>
                     <h3>AI 분석 중입니다</h3>
-                    <p>링크, 발신 내용, 요구 행동을 기준으로 위험성을 분석합니다.</p>
+                    <p>
+                      링크, 발신 내용, 요구 행동을 기준으로 위험성을 분석합니다.
+                    </p>
                   </div>
+
                   <div className="score-badge">
-                    <strong>···</strong>
+                    <div
+                      className="loading-dots"
+                      role="status"
+                      aria-label="AI 분석 중"
+                    >
+                      <span></span>
+                      <span></span>
+                      <span></span>
+                    </div>
+
                     <span>분석 중</span>
                   </div>
                 </div>
@@ -151,6 +223,7 @@ export default function SmsPage() {
                     <h3>분석 결과 대기 중</h3>
                     <p>의심 문자를 입력하고 AI 분석하기 버튼을 눌러주세요.</p>
                   </div>
+
                   <div className="score-badge">
                     <strong>--</strong>
                     <span>위험도</span>
@@ -158,15 +231,14 @@ export default function SmsPage() {
                 </div>
               )}
 
-              {showResult &&  result && (
+              {showResult && result && (
                 <>
                   <div className="result-top">
                     <div>
                       <h3>의심 문자 분석 결과</h3>
-                      <p>
-                        {result.reason}
-                      </p>
+                      <p>{result.reason}</p>
                     </div>
+
                     <div className="score-badge">
                       <strong>{result.riskLevel}</strong>
                       <span>위험도</span>
@@ -178,6 +250,7 @@ export default function SmsPage() {
                       <h4>
                         <span className="icon-dot"></span> 위험 신호
                       </h4>
+
                       <div className="chips">
                         <span className="chip danger">외부 링크 포함</span>
                         <span className="chip danger">본인인증 요구</span>
@@ -189,23 +262,26 @@ export default function SmsPage() {
                       <h4>
                         <span className="icon-dot"></span> 위험 유형
                       </h4>
+
                       <div className="chips">
-                          {result.riskTypes.map((item) => (
-                            <span className="chip danger" key={item}>
-                              {item}
-                            </span>
-                          ))}
-                        </div>  
+                        {result.riskTypes.map((item) => (
+                          <span className="chip danger" key={item}>
+                            {item}
+                          </span>
+                        ))}
+                      </div>
                     </article>
 
                     <article className="info-card full">
                       <h4>
                         <span className="icon-dot"></span> 우선 대응 체크리스트
                       </h4>
+
                       <ul className="check-list">
                         {result.recommendedActions.map((item, index) => (
                           <li key={`${item.id}-${index}`}>
                             <span className="num">{index + 1}</span>
+
                             <span>
                               <strong>{item.title}</strong>
                               <br />
