@@ -1,11 +1,19 @@
 import { NextResponse } from "next/server";
 import type { LeakAnalysisResult } from "../../../types/analysis";
-import { buildChecklist, calculateChecklistProgress } from "../../../lib/checklist";
-import { extractKeyInfo, analyzeWithSearchContext } from "../../../lib/gemini";
+import {
+  buildChecklist,
+  calculateChecklistProgress,
+} from "../../../lib/checklist";
+import {
+  extractKeyInfo,
+  analyzeWithSearchContext,
+} from "../../../lib/gemini";
 import { searchNaverNews } from "../../../lib/googleSearch";
 import { createServerSupabaseClient } from "../../../lib/supabase/server";
 
-async function saveLeakHistoryIfLoggedIn(result: LeakAnalysisResult) {
+async function saveLeakHistoryIfLoggedIn(
+  result: LeakAnalysisResult
+) {
   const supabase = await createServerSupabaseClient();
 
   const {
@@ -27,12 +35,18 @@ async function saveLeakHistoryIfLoggedIn(result: LeakAnalysisResult) {
     leaked_items: result.leakedItems ?? [],
     risk_types: result.riskTypes ?? [],
     checklist: result.checklist ?? [],
-    checklist_progress: calculateChecklistProgress(result.checklist ?? []),
-    result_summary: result.reportSummary ?? result.reason ?? null,
+    checklist_progress: calculateChecklistProgress(
+      result.checklist ?? []
+    ),
+    result_summary:
+      result.reportSummary ?? result.reason ?? null,
   });
 
   if (error) {
-    console.error("Failed to save leak history:", error.message);
+    console.error(
+      "Failed to save leak history:",
+      error.message
+    );
   }
 }
 
@@ -54,7 +68,8 @@ export async function POST(request: Request) {
     const extracted = await extractKeyInfo(inputText);
 
     const searchQuery =
-      extracted.company && extracted.company !== "알 수 없음"
+      extracted.company &&
+      extracted.company !== "알 수 없음"
         ? `${extracted.company} 개인정보 유출`
         : "개인정보 유출";
 
@@ -66,24 +81,42 @@ export async function POST(request: Request) {
       searchResults,
     });
 
-    const checklist = buildChecklist(extracted.leakedItems);
+    const checklist = buildChecklist(
+      extracted.leakedItems
+    );
 
     const result: LeakAnalysisResult = {
       type: "leak",
       company: extracted.company,
       service: extracted.service,
-      riskLevel: finalText.riskLevel ?? extracted.riskLevel,
+
+      // LeakCare 규칙 기반 위험도 계산 결과
+      riskLevel: extracted.riskLevel,
+      riskScore: extracted.riskScore,
+      baseScore: extracted.baseScore,
+      combinationScore: extracted.combinationScore,
+      adjustmentScore: extracted.adjustmentScore,
+      riskReasons: extracted.riskReasons,
+      matchedCombinationRules:
+        extracted.matchedCombinationRules,
+      sourceIds: extracted.sourceIds,
+
       leakedItems: extracted.leakedItems,
+
       riskTypes:
-        finalText.riskTypes && finalText.riskTypes.length > 0
+        finalText.riskTypes &&
+        finalText.riskTypes.length > 0
           ? finalText.riskTypes
           : extracted.riskTypes,
+
       reason: finalText.reason,
+
       evidence: searchResults.map((item) => ({
         title: item.title,
         url: item.url,
         summary: item.summary,
       })),
+
       checklist,
       familyMessage: finalText.familyMessage,
       reportSummary: finalText.reportSummary,
@@ -99,6 +132,9 @@ export async function POST(request: Request) {
         ? error.message
         : "분석 중 알 수 없는 오류가 발생했습니다.";
 
-    return NextResponse.json({ message }, { status: 500 });
+    return NextResponse.json(
+      { message },
+      { status: 500 }
+    );
   }
 }
