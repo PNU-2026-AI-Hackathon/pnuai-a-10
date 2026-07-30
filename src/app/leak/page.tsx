@@ -332,10 +332,6 @@ export default function LeakPage() {
           <span className="brand-badge">L</span>
           <span>LeakCare</span>
         </a>
-
-        <button className="ghost-btn" onClick={reset}>
-          초기화
-        </button>
       </header>
 
       <section className="workspace single-workspace">
@@ -401,9 +397,25 @@ export default function LeakPage() {
                   보호합니다.
                 </p>
 
-                <button className="primary-btn" onClick={analyze}>
-                  AI 분석하기
-                </button>
+                <div className="analyze-buttons">
+                  <button
+                    type="button"
+                    className="ghost-btn"
+                    onClick={reset}
+                    disabled={loading}
+                  >
+                    초기화
+                  </button>
+
+                  <button
+                    type="button"
+                    className="primary-btn"
+                    onClick={analyze}
+                    disabled={loading}
+                  >
+                    {loading ? "분석 중..." : "AI 분석하기"}
+                  </button>
+                </div>
               </div>
             </div>
           </section>
@@ -430,7 +442,16 @@ export default function LeakPage() {
                   </div>
 
                   <div className="score-badge">
-                    <strong>···</strong>
+                    <div
+                      className="loading-dots"
+                      role="status"
+                      aria-label="AI 분석 중"
+                    >
+                      <span></span>
+                      <span></span>
+                      <span></span>
+                    </div>
+
                     <span>분석 중</span>
                   </div>
                 </div>
