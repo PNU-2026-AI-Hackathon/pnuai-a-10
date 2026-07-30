@@ -10,6 +10,7 @@ import {
 } from "../../../lib/gemini";
 import { searchNaverNews } from "../../../lib/googleSearch";
 import { createServerSupabaseClient } from "../../../lib/supabase/server";
+import { getRiskSources } from "../../../data/riskSources";
 
 async function saveLeakHistoryIfLoggedIn(
   result: LeakAnalysisResult
@@ -90,7 +91,6 @@ export async function POST(request: Request) {
       company: extracted.company,
       service: extracted.service,
 
-      // LeakCare 규칙 기반 위험도 계산 결과
       riskLevel: extracted.riskLevel,
       riskScore: extracted.riskScore,
       baseScore: extracted.baseScore,
@@ -100,6 +100,7 @@ export async function POST(request: Request) {
       matchedCombinationRules:
         extracted.matchedCombinationRules,
       sourceIds: extracted.sourceIds,
+      sources: getRiskSources(extracted.sourceIds),
 
       leakedItems: extracted.leakedItems,
 
