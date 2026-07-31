@@ -103,9 +103,7 @@ export default function LeakPage() {
       const pdfDocument = await PDFDocument.create();
       pdfDocument.registerFontkit(fontkit);
 
-      const fontResponse = await fetch(
-        "/fonts/NanumGothic-Regular.ttf"
-      );
+      const fontResponse = await fetch("/fonts/NanumGothic-Regular.ttf");
 
       if (!fontResponse.ok) {
         throw new Error("한글 폰트 파일을 불러오지 못했습니다.");
@@ -193,19 +191,15 @@ export default function LeakPage() {
         y -= gapAfter;
       };
 
-      const company =
-        result.company?.trim() || "확인되지 않음";
-
+      const company = result.company?.trim() || "확인되지 않음";
       const leakedItems =
         result.leakedItems.length > 0
           ? result.leakedItems.join(", ")
           : "확인되지 않음";
-
       const riskTypes =
         result.riskTypes.length > 0
           ? result.riskTypes.join(", ")
           : "구체적인 위험 유형이 확인되지 않았습니다.";
-
       const situationSummary =
         result.reason?.trim() ||
         "입력된 안내문을 바탕으로 개인정보 유출 가능성과 후속 위험을 분석했습니다.";
@@ -223,7 +217,6 @@ export default function LeakPage() {
         6,
         rgb(0.25, 0.16, 0.4)
       );
-
       addText(company, 11, 18);
 
       addText(
@@ -232,17 +225,46 @@ export default function LeakPage() {
         6,
         rgb(0.25, 0.16, 0.4)
       );
-
       addText(`유출 정보: ${leakedItems}`, 11, 4);
-      addText(`위험도: ${result.riskLevel}`, 11, 18);
+      addText(`위험도: ${result.riskLevel}`, 11, 4);
+
+      if (result.riskScore !== undefined) {
+        addText(
+          `LeakCare 상대적 위험지수: ${result.riskScore} / 100`,
+          11,
+          4
+        );
+        addText(
+          `기본점수 ${result.baseScore ?? 0}점 · 조합점수 ${
+            result.combinationScore ?? 0
+          }점 · 보정점수 ${result.adjustmentScore ?? 0}점`,
+          11,
+          18
+        );
+      }
 
       addText(
-        "3. 예상되는 위험",
+        "3. 위험도 판단 근거",
         14,
         6,
         rgb(0.25, 0.16, 0.4)
       );
 
+      if (result.riskReasons?.length) {
+        result.riskReasons.forEach((reason, index) => {
+          addText(`${index + 1}. ${reason}`, 11, 4);
+        });
+        y -= 10;
+      } else {
+        addText(situationSummary, 11, 18);
+      }
+
+      addText(
+        "4. 예상되는 위험",
+        14,
+        6,
+        rgb(0.25, 0.16, 0.4)
+      );
       addText(
         `${riskTypes} 등의 2차 피해가 발생할 수 있습니다.`,
         11,
@@ -250,7 +272,7 @@ export default function LeakPage() {
       );
 
       addText(
-        "4. 우선 대응 방법",
+        "5. 우선 대응 방법",
         14,
         6,
         rgb(0.25, 0.16, 0.4)
@@ -269,34 +291,54 @@ export default function LeakPage() {
       y -= 14;
 
       addText(
-        "5. 현재 상황 요약",
+        "6. 공식 참고 자료",
         14,
         6,
         rgb(0.25, 0.16, 0.4)
       );
 
+      if (result.sources?.length) {
+        result.sources.forEach((source, index) => {
+          addText(
+            `${index + 1}. [${source.organization}] ${source.title}${
+              source.url ? `\n${source.url}` : ""
+            }`,
+            10,
+            6
+          );
+        });
+      } else {
+        addText("연결된 공식 참고 자료가 없습니다.", 11, 10);
+      }
+
+      addText(
+        "7. 현재 상황 요약",
+        14,
+        6,
+        rgb(0.25, 0.16, 0.4)
+      );
       addText(situationSummary, 11, 18);
 
-      const pdfBytes = await pdfDocument.save();
-
-      const pdfBlob = new Blob(
-        [new Uint8Array(pdfBytes)],
-        {
-          type: "application/pdf",
-        }
+      addText(
+        "※ 본 점수는 개인정보보호위원회와 KISA 등의 공식 자료를 참고해 LeakCare가 자체 설계한 상대적 위험지수이며, 피해 발생 확률이나 공식기관의 위험등급이 아닙니다.",
+        9,
+        12,
+        rgb(0.35, 0.35, 0.35)
       );
 
+      const pdfBytes = await pdfDocument.save();
+      const pdfBlob = new Blob([new Uint8Array(pdfBytes)], {
+        type: "application/pdf",
+      });
       const downloadUrl = URL.createObjectURL(pdfBlob);
       const downloadLink = document.createElement("a");
 
       downloadLink.href = downloadUrl;
-      downloadLink.download =
-        "LeakCare_개인정보_유출_분석_보고서.pdf";
+      downloadLink.download = "LeakCare_개인정보_유출_분석_보고서.pdf";
 
       document.body.appendChild(downloadLink);
       downloadLink.click();
       downloadLink.remove();
-
       URL.revokeObjectURL(downloadUrl);
     } catch (error) {
       console.error("PDF 저장 실패:", error);
@@ -355,7 +397,7 @@ export default function LeakPage() {
 
               <textarea
                 value={text}
-                onChange={(e) => setText(e.target.value)}
+                onChange={(event) => setText(event.target.value)}
                 placeholder="개인정보 유출 안내 문자, 이메일, 공지문 내용을 입력해주세요."
               />
 
@@ -375,8 +417,8 @@ export default function LeakPage() {
                   accept="image/*"
                   hidden
                   disabled={ocrLoading}
-                  onChange={(e) =>
-                    handleImageUpload(e.target.files?.[0])
+                  onChange={(event) =>
+                    handleImageUpload(event.target.files?.[0])
                   }
                 />
               </label>
@@ -451,7 +493,6 @@ export default function LeakPage() {
                       <span></span>
                       <span></span>
                     </div>
-
                     <span>분석 중</span>
                   </div>
                 </div>
@@ -485,17 +526,95 @@ export default function LeakPage() {
                     </div>
 
                     <div className="score-badge">
-                      <strong>{result.riskLevel}</strong>
-                      <span>위험도</span>
+                      <strong>
+                        {result.riskScore !== undefined
+                          ? result.riskScore
+                          : result.riskLevel}
+                      </strong>
+                      <span>
+                        {result.riskScore !== undefined
+                          ? `/ 100 · ${result.riskLevel}`
+                          : "위험도"}
+                      </span>
                     </div>
                   </div>
 
                   <div className="card-grid">
+                    {result.riskScore !== undefined && (
+                      <article className="info-card full">
+                        <h4>
+                          <span className="icon-dot"></span> LeakCare 상대적
+                          위험지수
+                        </h4>
+
+                        <div
+                          style={{
+                            display: "flex",
+                            alignItems: "flex-end",
+                            flexWrap: "wrap",
+                            gap: "12px",
+                            marginTop: "14px",
+                          }}
+                        >
+                          <strong
+                            style={{
+                              fontSize: "38px",
+                              lineHeight: 1,
+                              letterSpacing: "-1px",
+                            }}
+                          >
+                            {result.riskScore}
+                          </strong>
+                          <span style={{ fontSize: "15px", opacity: 0.68 }}>
+                            / 100
+                          </span>
+                          <strong
+                            style={{
+                              marginLeft: "4px",
+                              fontSize: "15px",
+                            }}
+                          >
+                            {result.riskLevel}
+                          </strong>
+                        </div>
+
+                        <p
+                          style={{
+                            marginTop: "12px",
+                            fontSize: "13px",
+                            lineHeight: 1.65,
+                            color: "#5f6673",
+                          }}
+                        >
+                          산정 내역: 항목 {result.baseScore ?? 0}점 + 조합 {
+                            result.combinationScore ?? 0
+                          }점 + 중요정보 보정 {result.adjustmentScore ?? 0}점
+                          {result.matchedCombinationRules?.length
+                            ? ` · 적용 조합: ${result.matchedCombinationRules.join(
+                                ", "
+                              )}`
+                            : ""}
+                        </p>
+
+                        <p
+                          style={{
+                            marginTop: "6px",
+                            fontSize: "12px",
+                            lineHeight: 1.6,
+                            color: "#7a808c",
+                          }}
+                        >
+                          공식기관 자료를 참고해 LeakCare가 자체 설계한 상대적
+                          위험지수이며, 피해 발생 확률이나 공식기관의 위험등급은
+                          아닙니다.
+                        </p>
+                      </article>
+                    )}
+
                     <article className="info-card">
                       <h4>
                         <span className="icon-dot"></span> 유출 항목
                       </h4>
-
                       <div className="chips">
                         {result.leakedItems.map((item) => (
                           <span className="chip warning" key={item}>
@@ -509,7 +628,6 @@ export default function LeakPage() {
                       <h4>
                         <span className="icon-dot"></span> 위험 유형
                       </h4>
-
                       <div className="chips">
                         {result.riskTypes.map((item) => (
                           <span className="chip warning" key={item}>
@@ -528,7 +646,6 @@ export default function LeakPage() {
                         {result.checklist.map((item, index) => (
                           <li key={`${item.id}-${index}`}>
                             <span className="num">{index + 1}</span>
-
                             <span>
                               <strong>{item.title}</strong>
                               <br />
@@ -558,12 +675,86 @@ export default function LeakPage() {
 
                     <article className="info-card full">
                       <h4>
+                        <span className="icon-dot"></span> 공식 참고 자료
+                      </h4>
+
+                      {result.sources?.length ? (
+                        <div
+                          style={{
+                            marginTop: "14px",
+                            padding: "4px 18px",
+                            border: "1px solid #e3e6eb",
+                            borderRadius: "14px",
+                            background: "#f5f6f8",
+                          }}
+                        >
+                          {result.sources.map((source, index) => (
+                            <div
+                              key={source.sourceId}
+                              style={{
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "space-between",
+                                gap: "18px",
+                                padding: "15px 0",
+                                borderBottom:
+                                  index === result.sources!.length - 1
+                                    ? "none"
+                                    : "1px solid #dde1e7",
+                              }}
+                            >
+                              <div style={{ minWidth: 0 }}>
+                                <strong
+                                  style={{
+                                    display: "block",
+                                    marginBottom: "4px",
+                                    fontSize: "14px",
+                                  }}
+                                >
+                                  {source.organization}
+                                </strong>
+                                <span
+                                  style={{
+                                    fontSize: "13px",
+                                    lineHeight: 1.55,
+                                    color: "#626977",
+                                  }}
+                                >
+                                  {source.title}
+                                </span>
+                              </div>
+
+                              {source.url && (
+                                <a
+                                  href={source.url}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  style={{
+                                    flexShrink: 0,
+                                    color: "inherit",
+                                    fontSize: "13px",
+                                    fontWeight: 700,
+                                    textDecoration: "underline",
+                                    textUnderlineOffset: "3px",
+                                  }}
+                                >
+                                  원문 보기
+                                </a>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <p>연결된 공식 참고 자료가 없습니다.</p>
+                      )}
+                    </article>
+
+                    <article className="info-card full">
+                      <h4>
                         <span className="icon-dot"></span> 가족 공유용 안내문
                       </h4>
 
-                      <div className="message-card">
-                        {result.familyMessage}
-                      </div>
+                      <div className="message-card">{result.familyMessage}</div>
                     </article>
 
                     <article className="info-card full">
@@ -579,10 +770,7 @@ export default function LeakPage() {
                           안내문 복사
                         </button>
 
-                        <button
-                          className="small-btn"
-                          onClick={saveAsPdf}
-                        >
+                        <button className="small-btn" onClick={saveAsPdf}>
                           PDF 저장
                         </button>
 
