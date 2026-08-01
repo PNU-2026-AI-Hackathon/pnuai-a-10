@@ -54,7 +54,9 @@ input {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 18px 7vw;
+  height: 88px;
+  padding: 0 7vw;
+  box-sizing: border-box;
   background: rgba(245, 247, 251, 0.8);
   backdrop-filter: blur(16px);
   border-bottom: 1px solid rgba(226, 232, 240, 0.75);
@@ -1169,7 +1171,9 @@ textarea:focus {
   position: sticky;
   top: 0;
   z-index: 20;
-  padding: 18px 7vw;
+  height: 88px;
+  padding: 07vw;
+  box-sizing: border-box;
   background: rgba(245, 247, 251, 0.85);
   backdrop-filter: blur(16px);
   border-bottom: 1px solid rgba(226, 232, 240, 0.75);
@@ -1394,10 +1398,11 @@ textarea:focus {
 /* 배너 페이지 상단 메뉴 버튼 */
 .nav-text-button {
   border: 0;
+  padding: 0;
   background: transparent;
   color: var(--muted);
   font-size: 14px;
-  font-weight: 800;
+  font-weight: 600;
   cursor: pointer;
 }
 
@@ -1699,5 +1704,60 @@ textarea:focus {
   .analyze-buttons .ghost-btn,
   .analyze-buttons .primary-btn {
     flex: 1;
+  }
+}
+
+/*분석 페이지들에 위 바로가기 추가*/
+.analysis-header {
+  width: 100%;
+  min-height: 88px;
+  padding: 0 5%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 32px;
+  background: #f5f7fb;
+  border-bottom: 1px solid #e5e8ef;
+}
+
+.analysis-nav {
+  display: flex;
+  align-items: center;
+  gap: 34px;
+}
+
+.analysis-nav a {
+  color: #697181;
+  font-size: 16px;
+  font-weight: 700;
+  text-decoration: none;
+  white-space: nowrap;
+  transition:
+    color 0.2s ease,
+    opacity 0.2s ease;
+}
+
+.analysis-nav a:hover,
+.analysis-nav a[aria-current="page"] {
+  color: #4f46e5;
+}
+
+@media (max-width: 900px) {
+  .analysis-header {
+    min-height: auto;
+    padding: 18px 20px;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .analysis-nav {
+    width: 100%;
+    gap: 20px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+  }
+
+  .analysis-nav a {
+    font-size: 14px;
   }
 }
