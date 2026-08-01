@@ -1761,3 +1761,9 @@ textarea:focus {
     font-size: 14px;
   }
 }
+
+/*내비게이션 바 현재 위치 표시*/
+.nav-menu a[aria-current="page"] {
+  color: #4f46e5;
+  font-weight: 800;
+}
