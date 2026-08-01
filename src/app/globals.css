@@ -1767,3 +1767,9 @@ textarea:focus {
   color: #4f46e5;
   font-weight: 800;
 }
+
+/*내비게이션 바 호버*/
+.nav-menu a:hover,
+.nav-text-button:hover {
+  color: #4f46e5;
+}
