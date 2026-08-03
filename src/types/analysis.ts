@@ -78,3 +78,51 @@ export type SmsAnalysisResult = {
 export type AnalysisResult =
   | LeakAnalysisResult
   | SmsAnalysisResult;
+
+export type ReportDamageStatus =
+  | "none"
+  | "suspected"
+  | "confirmed";
+
+export type ReportSummaryRequest = {
+  // 기존 분석 결과에서 자동으로 가져오는 정보
+  company: string;
+  service?: string;
+  leakedItems: string[];
+
+  // 사용자가 추가로 입력하는 정보
+  leakNoticeDate?: string;
+  discoveryMethod?: string;
+
+  damageStatus: ReportDamageStatus;
+  damageDate?: string;
+  damageAmount?: number;
+  damageDescription?: string;
+
+  suspiciousContact?: string;
+  evidenceItems?: string[];
+  actionsTaken?: string[];
+
+  requestPurpose?: string;
+};
+
+export type ReportSummarySections = {
+  incidentOverview: string;
+  leakedInformation: string;
+  damageStatus: string;
+  evidence: string;
+  actionsTaken: string;
+  requestDetails: string;
+};
+
+export type ReportSummaryResponse = {
+  title: string;
+  summaryText: string;
+  sections: ReportSummarySections;
+
+  // 사용자가 입력하지 않아 확인할 수 없는 항목
+  missingFields: string[];
+
+  // Gemini 실패 시 템플릿으로 작성했는지 구분
+  generationMode: "gemini" | "template";
+};
