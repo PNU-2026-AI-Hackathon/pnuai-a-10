@@ -418,8 +418,21 @@ export default function LeakPage() {
                 </span>
 
                 <span className="upload-pill">
-                  {ocrLoading ? "처리 중" : "이미지 업로드"}
+                  {ocrLoading ? (
+                    <span
+                    className="loading-dots"
+                    role="status"
+                    aria-label="이미지 텍스트 추출 중"
+                    >
+                      <span></span>
+                      <span></span>
+                      <span></span>
                 </span>
+                  ) : (
+                    "이미지 업로드"
+                  )}
+                  </span>
+                
 
                 <input
                   type="file"
