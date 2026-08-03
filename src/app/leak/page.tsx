@@ -12,6 +12,119 @@ const sampleText = `개인정보 유출 안내
 결제 비밀번호 및 카드번호는 유출 대상에 포함되지 않았습니다.
 유출 사실을 악용한 택배 사칭 문자, 환불 안내 문자, 본인인증 요구에 주의해주시기 바랍니다.`;
 
+type RiskGaugeProps = {
+  riskLevel: "낮음" | "보통" | "높음";
+  riskScore?: number;
+};
+
+function RiskGauge({ riskLevel, riskScore }: RiskGaugeProps) {
+  const fallbackScore = {
+    낮음: 10,
+    보통: 30,
+    높음: 70,
+  }[riskLevel];
+
+  const score = Math.max(0, Math.min(100, riskScore ?? fallbackScore));
+
+  // 표시용 바늘 각도이며 실제 위험도 계산 기준에는 영향을 주지 않습니다.
+  const needleAngle = -90 + score * 1.8;
+
+  return (
+    <div
+      className="risk-gauge"
+      role="img"
+      aria-label={`위험도 ${riskLevel}, 위험지수 ${score}점`}
+    >
+      <svg viewBox="0 0 180 115" aria-hidden="true">
+        <defs>
+          <linearGradient
+            id="riskNeedleGradient"
+            x1="0"
+            y1="0"
+            x2="1"
+            y2="1"
+          >
+            <stop offset="0%" stopColor="#2563eb" />
+            <stop offset="100%" stopColor="#7c3aed" />
+          </linearGradient>
+        </defs>
+
+       {/* 낮음 구간: 0~19점, 전체의 약 20% */}
+        <path
+          d="M 30 90 A 60 60 0 0 1 41.46 54.73"
+          fill="none"
+          stroke="#70c629"
+          strokeWidth="24"
+          strokeLinecap="butt"
+        />
+
+        {/* 보통 구간: 20~39점, 전체의 약 20% */}
+        <path
+          d="M 41.46 54.73 A 60 60 0 0 1 71.46 32.94"
+          fill="none"
+          stroke="#ffc522"
+          strokeWidth="24"
+          strokeLinecap="butt"
+        />
+
+        {/* 높음 구간: 40~100점, 전체의 약 60% */}
+        <path
+          d="M 71.46 32.94 A 60 60 0 0 1 150 90"
+          fill="none"
+          stroke="#f45b20"
+          strokeWidth="24"
+          strokeLinecap="butt"
+        />
+
+        {/* 낮음과 보통 사이 분리선 */}
+          <line
+            x1="32"
+            y1="48"
+            x2="51"
+            y2="62"
+            stroke="#ffffff"
+            strokeWidth="4"
+            strokeLinecap="butt"
+          />
+
+          {/* 보통과 높음 사이 분리선 */}
+          <line
+            x1="68"
+            y1="22"
+            x2="75"
+            y2="44"
+            stroke="#ffffff"
+            strokeWidth="4"
+            strokeLinecap="butt"
+          />
+
+        {/* 바늘 */}
+        <g transform={`rotate(${needleAngle} 90 91)`}>
+          <path
+            d="M 82 91 L 90 43 L 98 91 Z"
+            fill="url(#riskNeedleGradient)"
+          />
+        </g>
+
+        {/* 바늘 중심 */}
+        <circle
+          cx="90"
+          cy="91"
+          r="10"
+          fill="url(#riskNeedleGradient)"
+        />
+
+        <circle
+          cx="90"
+          cy="91"
+          r="4"
+          fill="#ffffff"
+        />
+      </svg>
+    </div>
+  );
+}
+
 export default function LeakPage() {
   const [text, setText] = useState("");
   const [loading, setLoading] = useState(false);
@@ -420,19 +533,18 @@ export default function LeakPage() {
                 <span className="upload-pill">
                   {ocrLoading ? (
                     <span
-                    className="loading-dots"
-                    role="status"
-                    aria-label="이미지 텍스트 추출 중"
+                      className="loading-dots"
+                      role="status"
+                      aria-label="이미지 텍스트 추출 중"
                     >
                       <span></span>
                       <span></span>
                       <span></span>
-                </span>
+                    </span>
                   ) : (
                     "이미지 업로드"
                   )}
-                  </span>
-                
+                </span>
 
                 <input
                   type="file"
@@ -538,7 +650,7 @@ export default function LeakPage() {
 
               {showResult && result && (
                 <>
-                  <div className="result-top">
+                  <div className="result-top result-top-complete">
                     <div>
                       <h3>유출 안내문 분석 결과</h3>
                       <p>
@@ -547,17 +659,11 @@ export default function LeakPage() {
                       </p>
                     </div>
 
-                    <div className="score-badge">
-                      <strong>
-                        {result.riskScore !== undefined
-                          ? result.riskScore
-                          : result.riskLevel}
-                      </strong>
-                      <span>
-                        {result.riskScore !== undefined
-                          ? `/ 100 · ${result.riskLevel}`
-                          : "위험도"}
-                      </span>
+                    <div className="score-badge result-score-badge">
+                      <RiskGauge
+                        riskLevel={result.riskLevel}
+                        riskScore={result.riskScore}
+                      />
                     </div>
                   </div>
 
