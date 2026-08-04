@@ -26,7 +26,7 @@ function RiskGauge({ riskLevel, riskScore }: RiskGaugeProps) {
 
   const score = Math.max(0, Math.min(100, riskScore ?? fallbackScore));
 
-  // 표시용 바늘 각도이며 실제 위험도 계산 기준에는 영향을 주지 않습니다.
+  // 0점은 왼쪽, 100점은 오른쪽입니다.
   const needleAngle = -90 + score * 1.8;
 
   return (
@@ -37,89 +37,129 @@ function RiskGauge({ riskLevel, riskScore }: RiskGaugeProps) {
     >
       <svg viewBox="0 0 180 115" aria-hidden="true">
         <defs>
+          {/* 낮음 → 보통 경계 혼합 */}
           <linearGradient
-            id="riskNeedleGradient"
-            x1="0"
-            y1="0"
-            x2="1"
-            y2="1"
+            id="lowMediumBlend"
+            x1="39.34"
+            y1="58.85"
+            x2="43.77"
+            y2="52.75"
+            gradientUnits="userSpaceOnUse"
           >
-            <stop offset="0%" stopColor="#2563eb" />
-            <stop offset="100%" stopColor="#7c3aed" />
+            <stop offset="0%" stopColor="#63D3B1" />
+            <stop offset="50%" stopColor="#AEDB82" />
+            <stop offset="100%" stopColor="#F6C95C" />
           </linearGradient>
+
+          {/* 보통 → 높음 경계 혼합 */}
+          <linearGradient
+            id="mediumHighBlend"
+            x1="67.91"
+            y1="35.21"
+            x2="75.08"
+            y2="32.89"
+            gradientUnits="userSpaceOnUse"
+          >
+            <stop offset="0%" stopColor="#F6C95C" />
+            <stop offset="50%" stopColor="#F4A76A" />
+            <stop offset="100%" stopColor="#F07778" />
+          </linearGradient>
+
+          <filter
+            id="needleShadow"
+            x="-40%"
+            y="-40%"
+            width="180%"
+            height="180%"
+          >
+            <feDropShadow
+              dx="0"
+              dy="1"
+              stdDeviation="1"
+              floodColor="#4338CA"
+              floodOpacity="0.16"
+            />
+          </filter>
         </defs>
 
-       {/* 낮음 구간: 0~19점, 전체의 약 20% */}
+        {/* 계기판 뒤쪽 트랙 */}
         <path
-          d="M 30 90 A 60 60 0 0 1 41.46 54.73"
+          d="M 30 91 A 60 60 0 0 1 150 91"
           fill="none"
-          stroke="#70c629"
-          strokeWidth="24"
+          stroke="#F1F3F6"
+          strokeWidth="30"
+          strokeLinecap="round"
+        />
+
+        {/* 낮음: 0~19점, 약 20% */}
+        <path
+          d="M 30 91 A 60 60 0 0 1 41.46 55.73"
+          fill="none"
+          stroke="#63D3B1"
+          strokeWidth="28"
           strokeLinecap="butt"
         />
 
-        {/* 보통 구간: 20~39점, 전체의 약 20% */}
+        {/* 보통: 20~39점, 약 20% */}
         <path
-          d="M 41.46 54.73 A 60 60 0 0 1 71.46 32.94"
+          d="M 41.46 55.73 A 60 60 0 0 1 71.46 33.94"
           fill="none"
-          stroke="#ffc522"
-          strokeWidth="24"
+          stroke="#F6C95C"
+          strokeWidth="28"
           strokeLinecap="butt"
         />
 
-        {/* 높음 구간: 40~100점, 전체의 약 60% */}
+        {/* 높음: 40~100점, 약 60% */}
         <path
-          d="M 71.46 32.94 A 60 60 0 0 1 150 90"
+          d="M 71.46 33.94 A 60 60 0 0 1 150 91"
           fill="none"
-          stroke="#f45b20"
-          strokeWidth="24"
+          stroke="#F07778"
+          strokeWidth="28"
           strokeLinecap="butt"
         />
 
-        {/* 낮음과 보통 사이 분리선 */}
-          <line
-            x1="32"
-            y1="48"
-            x2="51"
-            y2="62"
-            stroke="#ffffff"
-            strokeWidth="4"
-            strokeLinecap="butt"
-          />
+        {/* 낮음과 보통 사이를 짧고 부드럽게 연결 */}
+        <path
+          d="M 39.34 58.85 A 60 60 0 0 1 43.77 52.75"
+          fill="none"
+          stroke="url(#lowMediumBlend)"
+          strokeWidth="28"
+          strokeLinecap="butt"
+        />
 
-          {/* 보통과 높음 사이 분리선 */}
-          <line
-            x1="68"
-            y1="22"
-            x2="75"
-            y2="44"
-            stroke="#ffffff"
-            strokeWidth="4"
-            strokeLinecap="butt"
-          />
+        {/* 보통과 높음 사이를 짧고 부드럽게 연결 */}
+        <path
+          d="M 67.91 35.21 A 60 60 0 0 1 75.08 32.89"
+          fill="none"
+          stroke="url(#mediumHighBlend)"
+          strokeWidth="28"
+          strokeLinecap="butt"
+        />
+
+        {/* 양 끝 둥근 마감 */}
+        <circle cx="30" cy="91" r="14" fill="#63D3B1" />
+        <circle cx="150" cy="91" r="14" fill="#F07778" />
 
         {/* 바늘 */}
-        <g transform={`rotate(${needleAngle} 90 91)`}>
-          <path
-            d="M 82 91 L 90 43 L 98 91 Z"
-            fill="url(#riskNeedleGradient)"
+        <g
+          transform={`rotate(${needleAngle} 90 91)`}
+          filter="url(#needleShadow)"
+        >
+          <line
+            x1="90"
+            y1="91"
+            x2="90"
+            y2="47"
+            stroke="#554BE7"
+            strokeWidth="3.5"
+            strokeLinecap="round"
           />
+          <circle cx="90" cy="47" r="2.5" fill="#554BE7" />
         </g>
 
         {/* 바늘 중심 */}
-        <circle
-          cx="90"
-          cy="91"
-          r="10"
-          fill="url(#riskNeedleGradient)"
-        />
-
-        <circle
-          cx="90"
-          cy="91"
-          r="4"
-          fill="#ffffff"
-        />
+        <circle cx="90" cy="91" r="7" fill="#FFFFFF" />
+        <circle cx="90" cy="91" r="4" fill="#554BE7" />
       </svg>
     </div>
   );
