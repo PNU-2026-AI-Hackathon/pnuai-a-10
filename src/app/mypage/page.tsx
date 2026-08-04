@@ -74,6 +74,17 @@ export default function MyPage() {
     setUser(null);
   };
 
+  const loginProvider =
+    user?.app_metadata?.provider ?? user?.identities?.[0]?.provider ?? "";
+
+  const accountEmail =
+    user?.email ??
+    user?.identities?.find(
+      (identity) => identity.provider === loginProvider
+    )?.identity_data?.email ??
+    user?.user_metadata.email ??
+    "";
+
   if (loading) {
     return (
       <main className="analysis-page">
@@ -149,7 +160,7 @@ export default function MyPage() {
           <div className="app-shell">
             <section className="panel">
               <div className="results">
-                <div className="result-top">
+                <div className="result-top mypage-info-header">
                   <div>
                     <h3>내 정보</h3>
                     <p>현재 로그인된 계정 정보입니다.</p>
@@ -158,10 +169,58 @@ export default function MyPage() {
 
                 <div className="card-grid">
                   <article className="info-card full">
-                    <h4>
-                      <span className="icon-dot"></span> 계정
+                   <h4 className="account-title">
+                      <span className="icon-dot"></span>
+                      <span>계정</span>
+
+                      {loginProvider === "google" && (
+                        <span
+                          className="login-provider-logo google-logo"
+                          title="Google 계정으로 로그인"
+                          aria-label="Google 계정으로 로그인"
+                        >
+                          <svg viewBox="0 0 48 48" aria-hidden="true">
+                            <path
+                              fill="#FFC107"
+                              d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34.1 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.2-.1-2.4-.4-3.5Z"
+                            />
+                            <path
+                              fill="#FF3D00"
+                              d="m6.3 14.7 6.6 4.8C14.7 15.2 19 12 24 12c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34.1 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7Z"
+                            />
+                            <path
+                              fill="#4CAF50"
+                              d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-7.9l-6.5 5C9.6 39.5 16.3 44 24 44Z"
+                            />
+                            <path
+                              fill="#1976D2"
+                              d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.3 4.2-4.2 5.6l6.2 5.2C41 35.4 44 30.4 44 24c0-1.2-.1-2.4-.4-3.5Z"
+                            />
+                          </svg>
+                        </span>
+                          )}
+
+                      {loginProvider === "kakao" && (
+                        <span
+                          className="login-provider-logo kakao-logo"
+                          title="카카오 계정으로 로그인"
+                          aria-label="카카오 계정으로 로그인"
+                        >
+                          <svg
+                            viewBox="0 0 24 24"
+                            aria-hidden="true"
+                          >
+                            <path d="M12 4C6.48 4 2 7.45 2 11.7c0 2.73 1.85 5.13 4.64 6.5l-.95 3.5c-.08.3.26.54.52.36l4.18-2.78c.52.07 1.06.11 1.61.11 5.52 0 10-3.45 10-7.69S17.52 4 12 4Z" />
+                          </svg>
+                        </span>
+                      )}
                     </h4>
-                    <p>{user.email ?? "이메일 정보 없음"}</p>
+                    <p>
+                        {accountEmail ||
+                          (loginProvider === "kakao"
+                            ? "카카오 계정에서 이메일을 제공하지 않았습니다."
+                            : "이메일 정보 없음")}
+                      </p>
                   </article>
 
                   <article className="info-card full">

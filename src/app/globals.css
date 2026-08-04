@@ -1820,3 +1820,52 @@ textarea:focus {
   border-radius: 0;
   padding: 0;
 }
+
+/* 마이페이지 내 정보 상단 박스 배경 제거 */
+.mypage-info-header {
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  padding: 0;
+}
+
+/* 마이페이지 로그인 제공자 로고 */
+.account-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.login-provider-logo {
+  width: 26px;
+  height: 26px;
+  margin-left: 2px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 14px;
+  font-weight: 900;
+}
+
+.google-logo {
+  background: #ffffff;
+  border: 1px solid #dadce0;
+}
+
+.googld-logo svg {
+  width: 18px;
+  height: 18px;
+  display: block;
+}
+
+.kakao-logo {
+  background: #fee500;
+}
+
+.kakao-logo svg {
+  width: 17px;
+  height: 17px;
+  fill: #191919;
+}
