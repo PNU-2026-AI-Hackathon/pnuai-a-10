@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import type { SmsAnalysisResult } from "../../../types/analysis";
 import { analyzeSuspiciousMessage } from "../../../lib/gemini";
 import { createServerSupabaseClient } from "../../../lib/supabase/server";
+import { maskPersonalInfo } from "../../../utils/personalInfoMasking";
 
 async function saveSmsHistoryIfLoggedIn(result: SmsAnalysisResult) {
   const supabase = await createServerSupabaseClient();
@@ -57,7 +58,9 @@ export async function POST(request: Request) {
       );
     }
 
-    const result = await analyzeSuspiciousMessage(inputText);
+    const maskedInputText = maskPersonalInfo(inputText);
+
+    const result = await analyzeSuspiciousMessage(maskedInputText);
 
     await saveSmsHistoryIfLoggedIn(result);
 

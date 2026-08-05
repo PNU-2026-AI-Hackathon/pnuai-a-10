@@ -178,6 +178,7 @@ export async function generateReportSummaryWithGemini(
 - 신고 기관 담당자가 이해하기 쉽도록 사실 중심으로 작성해라.
 - 각 항목은 짧고 명확하게 작성해라.
 - 기본 템플릿의 의미를 바꾸지 말고 문장만 자연스럽게 다듬어라.
+- 입력에 포함된 LeakCare 내부 마스킹 토큰은 어떤 경우에도 수정, 번역, 삭제, 분리, 병합, 재정렬하지 말고 토큰 문자열을 정확히 그대로 출력해라.
 
 [사용자 입력]
 ${JSON.stringify(input, null, 2)}

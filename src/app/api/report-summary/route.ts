@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 
 import { buildReportSummaryTemplate } from "../../../lib/reportSummary";
 import { generateReportSummaryWithGemini } from "../../../lib/reportSummaryGemini";
+import { createPersonalInfoTokenMasker } from "../../../utils/personalInfoMasking";
 
 import type {
   ReportDamageStatus,
@@ -72,6 +73,65 @@ function isDamageStatus(
     value === "suspected" ||
     value === "confirmed"
   );
+}
+
+function maskStringArray(
+  values: string[],
+  mask: (value: string) => string
+): string[] {
+  return values.map((value) => mask(value));
+}
+
+function maskOptionalString(
+  value: string | undefined,
+  mask: (value: string) => string
+): string | undefined {
+  return value ? mask(value) : undefined;
+}
+
+function maskReportSummaryRequest(
+  input: ReportSummaryRequest,
+  mask: (value: string) => string
+): ReportSummaryRequest {
+  return {
+    company: mask(input.company),
+    service: maskOptionalString(input.service, mask),
+    leakedItems: maskStringArray(input.leakedItems, mask),
+    leakNoticeDate: maskOptionalString(
+      input.leakNoticeDate,
+      mask
+    ),
+    discoveryMethod: maskOptionalString(
+      input.discoveryMethod,
+      mask
+    ),
+    damageStatus: input.damageStatus,
+    damageDate: maskOptionalString(
+      input.damageDate,
+      mask
+    ),
+    damageAmount: input.damageAmount,
+    damageDescription: maskOptionalString(
+      input.damageDescription,
+      mask
+    ),
+    suspiciousContact: maskOptionalString(
+      input.suspiciousContact,
+      mask
+    ),
+    evidenceItems: maskStringArray(
+      input.evidenceItems ?? [],
+      mask
+    ),
+    actionsTaken: maskStringArray(
+      input.actionsTaken ?? [],
+      mask
+    ),
+    requestPurpose: maskOptionalString(
+      input.requestPurpose,
+      mask
+    ),
+  };
 }
 
 export async function POST(
@@ -159,13 +219,82 @@ export async function POST(
       );
 
     try {
+      const personalInfoMasker =
+        createPersonalInfoTokenMasker();
+      const maskedReportInput =
+        maskReportSummaryRequest(
+          reportInput,
+          personalInfoMasker.mask
+        );
+      const maskedTemplate = {
+        ...template,
+        summaryText: personalInfoMasker.mask(
+          template.summaryText
+        ),
+        sections: {
+          incidentOverview:
+            personalInfoMasker.mask(
+              template.sections.incidentOverview
+            ),
+          leakedInformation:
+            personalInfoMasker.mask(
+              template.sections.leakedInformation
+            ),
+          damageStatus:
+            personalInfoMasker.mask(
+              template.sections.damageStatus
+            ),
+          evidence: personalInfoMasker.mask(
+            template.sections.evidence
+          ),
+          actionsTaken:
+            personalInfoMasker.mask(
+              template.sections.actionsTaken
+            ),
+          requestDetails:
+            personalInfoMasker.mask(
+              template.sections.requestDetails
+            ),
+        },
+      };
+
       const generated =
         await generateReportSummaryWithGemini(
-          reportInput,
-          template
+          maskedReportInput,
+          maskedTemplate
         );
 
-      return NextResponse.json(generated);
+      return NextResponse.json({
+        ...generated,
+        summaryText: personalInfoMasker.restore(
+          generated.summaryText
+        ),
+        sections: {
+          incidentOverview:
+            personalInfoMasker.restore(
+              generated.sections.incidentOverview
+            ),
+          leakedInformation:
+            personalInfoMasker.restore(
+              generated.sections.leakedInformation
+            ),
+          damageStatus:
+            personalInfoMasker.restore(
+              generated.sections.damageStatus
+            ),
+          evidence: personalInfoMasker.restore(
+            generated.sections.evidence
+          ),
+          actionsTaken:
+            personalInfoMasker.restore(
+              generated.sections.actionsTaken
+            ),
+          requestDetails:
+            personalInfoMasker.restore(
+              generated.sections.requestDetails
+            ),
+        },
+      });
     } catch (geminiError) {
       // Gemini 오류가 발생해도 API 전체를 실패시키지 않고
       // 기존 템플릿 결과를 그대로 반환합니다.

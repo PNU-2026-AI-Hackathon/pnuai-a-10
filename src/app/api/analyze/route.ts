@@ -11,6 +11,7 @@ import {
 import { searchNaverNews } from "../../../lib/googleSearch";
 import { createServerSupabaseClient } from "../../../lib/supabase/server";
 import { getRiskSources } from "../../../data/riskSources";
+import { maskPersonalInfo } from "../../../utils/personalInfoMasking";
 
 async function saveLeakHistoryIfLoggedIn(
   result: LeakAnalysisResult
@@ -66,7 +67,9 @@ export async function POST(request: Request) {
       );
     }
 
-    const extracted = await extractKeyInfo(inputText);
+    const maskedInputText = maskPersonalInfo(inputText);
+
+    const extracted = await extractKeyInfo(maskedInputText);
 
     const searchQuery =
       extracted.company &&
@@ -77,7 +80,7 @@ export async function POST(request: Request) {
     const searchResults = await searchNaverNews(searchQuery);
 
     const finalText = await analyzeWithSearchContext({
-      inputText,
+      inputText: maskedInputText,
       extracted,
       searchResults,
     });

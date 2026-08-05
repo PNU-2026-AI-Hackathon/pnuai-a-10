@@ -10,8 +10,6 @@ export async function extractTextFromImage(file: File): Promise<string> {
 
     const text = result.data.text.trim();
 
-    console.log("OCR 추출 결과:", text);
-
     return text;
   } finally {
     await worker.terminate();
