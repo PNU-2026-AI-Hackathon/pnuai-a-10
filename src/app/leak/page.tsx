@@ -923,6 +923,21 @@ export default function LeakPage() {
                       </h4>
 
                       <div className="message-card">{result.familyMessage}</div>
+
+                      <div
+                      className="action-buttons"
+                      style={{
+                        marginTop: "14px",
+                      }}
+                      >
+                        <button
+                        type="button"
+                        className="small-btn"
+                        onClick={copyFamilyMessage}
+                        >
+                          안내문 복사
+                        </button>
+                      </div>
                     </article>
 
                     <article className="info-card full">
@@ -932,13 +947,10 @@ export default function LeakPage() {
 
                       <div className="action-buttons">
                         <button
+                        type="button"
                           className="small-btn"
-                          onClick={copyFamilyMessage}
+                          onClick={saveAsPdf}
                         >
-                          안내문 복사
-                        </button>
-
-                        <button className="small-btn" onClick={saveAsPdf}>
                           PDF 저장
                         </button>
 
