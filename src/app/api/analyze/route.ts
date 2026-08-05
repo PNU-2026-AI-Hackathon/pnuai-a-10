@@ -77,7 +77,16 @@ export async function POST(request: Request) {
         ? `${extracted.company} 개인정보 유출`
         : "개인정보 유출";
 
-    const searchResults = await searchNaverNews(searchQuery);
+    let searchResults: Awaited<
+      ReturnType<typeof searchNaverNews>
+    > = [];
+
+    try {
+      searchResults = await searchNaverNews(searchQuery);
+    } catch (error) {
+      console.error("Naver search failed:", error);
+      searchResults = [];
+    }
 
     const finalText = await analyzeWithSearchContext({
       inputText: maskedInputText,
