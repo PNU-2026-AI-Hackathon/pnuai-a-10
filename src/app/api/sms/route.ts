@@ -2,7 +2,27 @@ import { NextResponse } from "next/server";
 import type { SmsAnalysisResult } from "../../../types/analysis";
 import { analyzeSuspiciousMessage } from "../../../lib/gemini";
 import { createServerSupabaseClient } from "../../../lib/supabase/server";
+import { TimeoutError, withTimeout } from "../../../lib/timeout";
 import { maskPersonalInfo } from "../../../utils/personalInfoMasking";
+
+const MAX_SMS_INPUT_LENGTH = 5_000;
+const GEMINI_SMS_TIMEOUT_MS = 30_000;
+
+async function runWithTimeout<T>(
+  operation: (signal: AbortSignal) => Promise<T>,
+  timeoutMs: number
+): Promise<T> {
+  const controller = new AbortController();
+
+  try {
+    return await withTimeout(
+      operation(controller.signal),
+      timeoutMs
+    );
+  } finally {
+    controller.abort();
+  }
+}
 
 async function saveSmsHistoryIfLoggedIn(result: SmsAnalysisResult) {
   const supabase = await createServerSupabaseClient();
@@ -49,7 +69,8 @@ export async function POST(request: Request) {
       inputText?: string;
     } | null;
 
-    const inputText = body?.inputText?.trim();
+    const rawInputText = body?.inputText;
+    const inputText = rawInputText?.trim();
 
     if (!inputText) {
       return NextResponse.json(
@@ -58,9 +79,23 @@ export async function POST(request: Request) {
       );
     }
 
+    if (rawInputText.length > MAX_SMS_INPUT_LENGTH) {
+      return NextResponse.json(
+        {
+          message:
+            "분석할 문자 내용이 너무 깁니다. 내용을 5,000자 이하로 줄여 주세요.",
+        },
+        { status: 400 }
+      );
+    }
+
     const maskedInputText = maskPersonalInfo(inputText);
 
-    const result = await analyzeSuspiciousMessage(maskedInputText);
+    const result = await runWithTimeout(
+      (signal) =>
+        analyzeSuspiciousMessage(maskedInputText, signal),
+      GEMINI_SMS_TIMEOUT_MS
+    );
 
     await saveSmsHistoryIfLoggedIn(result);
 
@@ -71,7 +106,9 @@ export async function POST(request: Request) {
     return NextResponse.json(
       {
         message:
-          "의심 문자 분석 서비스가 일시적으로 지연되고 있습니다. 잠시 후 다시 시도해 주세요.",
+          error instanceof TimeoutError
+            ? "의심 문자 분석 서비스 응답이 지연되고 있습니다. 잠시 후 다시 시도해 주세요."
+            : "의심 문자 분석 서비스가 일시적으로 지연되고 있습니다. 잠시 후 다시 시도해 주세요.",
       },
       { status: 500 }
     );

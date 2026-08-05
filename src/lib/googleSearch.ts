@@ -27,7 +27,7 @@ function stripHtml(value: string): string {
     .trim();
 }
 
-export async function searchNaverNews(query: string): Promise<NaverNewsResult[]> {
+export async function searchNaverNews(query: string, signal?: AbortSignal): Promise<NaverNewsResult[]> {
   const clientId = process.env.NAVER_CLIENT_ID;
   const clientSecret = process.env.NAVER_CLIENT_SECRET;
 
@@ -50,6 +50,7 @@ export async function searchNaverNews(query: string): Promise<NaverNewsResult[]>
         "X-Naver-Client-Id": clientId,
         "X-Naver-Client-Secret": clientSecret,
       },
+      signal,
       cache: "no-store",
     }
   );

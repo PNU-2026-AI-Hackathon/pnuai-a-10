@@ -10,8 +10,29 @@ import {
 } from "../../../lib/gemini";
 import { searchNaverNews } from "../../../lib/googleSearch";
 import { createServerSupabaseClient } from "../../../lib/supabase/server";
+import { TimeoutError, withTimeout } from "../../../lib/timeout";
 import { getRiskSources } from "../../../data/riskSources";
 import { maskPersonalInfo } from "../../../utils/personalInfoMasking";
+
+const MAX_ANALYZE_INPUT_LENGTH = 30_000;
+const NAVER_SEARCH_TIMEOUT_MS = 8_000;
+const GEMINI_ANALYSIS_TIMEOUT_MS = 30_000;
+
+async function runWithTimeout<T>(
+  operation: (signal: AbortSignal) => Promise<T>,
+  timeoutMs: number
+): Promise<T> {
+  const controller = new AbortController();
+
+  try {
+    return await withTimeout(
+      operation(controller.signal),
+      timeoutMs
+    );
+  } finally {
+    controller.abort();
+  }
+}
 
 async function saveLeakHistoryIfLoggedIn(
   result: LeakAnalysisResult
@@ -58,7 +79,8 @@ export async function POST(request: Request) {
       inputText?: string;
     } | null;
 
-    const inputText = body?.inputText?.trim();
+    const rawInputText = body?.inputText;
+    const inputText = rawInputText?.trim();
 
     if (!inputText) {
       return NextResponse.json(
@@ -67,9 +89,22 @@ export async function POST(request: Request) {
       );
     }
 
+    if (rawInputText.length > MAX_ANALYZE_INPUT_LENGTH) {
+      return NextResponse.json(
+        {
+          message:
+            "분석할 내용이 너무 깁니다. 내용을 30,000자 이하로 줄여 주세요.",
+        },
+        { status: 400 }
+      );
+    }
+
     const maskedInputText = maskPersonalInfo(inputText);
 
-    const extracted = await extractKeyInfo(maskedInputText);
+    const extracted = await runWithTimeout(
+      (signal) => extractKeyInfo(maskedInputText, signal),
+      GEMINI_ANALYSIS_TIMEOUT_MS
+    );
 
     const searchQuery =
       extracted.company &&
@@ -82,17 +117,27 @@ export async function POST(request: Request) {
     > = [];
 
     try {
-      searchResults = await searchNaverNews(searchQuery);
+      searchResults = await runWithTimeout(
+        (signal) => searchNaverNews(searchQuery, signal),
+        NAVER_SEARCH_TIMEOUT_MS
+      );
     } catch (error) {
       console.error("Naver search failed:", error);
       searchResults = [];
     }
 
-    const finalText = await analyzeWithSearchContext({
-      inputText: maskedInputText,
-      extracted,
-      searchResults,
-    });
+    const finalText = await runWithTimeout(
+      (signal) =>
+        analyzeWithSearchContext(
+          {
+            inputText: maskedInputText,
+            extracted,
+            searchResults,
+          },
+          signal
+        ),
+      GEMINI_ANALYSIS_TIMEOUT_MS
+    );
 
     const checklist = buildChecklist(
       extracted.leakedItems
@@ -145,14 +190,18 @@ export async function POST(request: Request) {
     const isGeminiError =
       error instanceof Error &&
       error.message.includes("Gemini API 호출 실패");
+    const isTimeoutError = error instanceof TimeoutError;
 
     return NextResponse.json(
       {
-        message: isGeminiError
-          ? "AI 분석 서비스가 일시적으로 지연되고 있습니다. 잠시 후 다시 시도해 주세요."
-          : "분석 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.",
+        message:
+          isTimeoutError
+            ? "분석 서비스 응답이 지연되고 있습니다. 잠시 후 다시 시도해 주세요."
+            : isGeminiError
+              ? "AI 분석 서비스가 일시적으로 지연되고 있습니다. 잠시 후 다시 시도해 주세요."
+            : "분석 중 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.",
       },
-      { status: isGeminiError ? 503 : 500 }
+      { status: isTimeoutError || isGeminiError ? 503 : 500 }
     );
   }
 }
