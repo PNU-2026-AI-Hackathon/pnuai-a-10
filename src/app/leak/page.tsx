@@ -937,6 +937,14 @@ export default function LeakPage() {
                         >
                           안내문 복사
                         </button>
+
+                        <button
+                        type="button"
+                        className="small-btn"
+                        onClick={showComingSoon}
+                        >
+                          공유하기
+                        </button>
                       </div>
                     </article>
 
