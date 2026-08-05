@@ -62,10 +62,13 @@ export async function GET() {
     .order("created_at", { ascending: false });
 
   if (error) {
+    console.error("Failed to fetch history:", error);
+
     return NextResponse.json(
       {
         error: "이력 조회에 실패했습니다.",
-        detail: error.message,
+        detail:
+          "분석 이력을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.",
       },
       { status: 500 }
     );
@@ -141,10 +144,13 @@ export async function POST(request: Request) {
     .single();
 
   if (error) {
+    console.error("Failed to save history:", error);
+
     return NextResponse.json(
       {
         error: "이력 저장에 실패했습니다.",
-        detail: error.message,
+        detail:
+          "분석 이력을 저장하지 못했습니다. 잠시 후 다시 시도해 주세요.",
       },
       { status: 500 }
     );

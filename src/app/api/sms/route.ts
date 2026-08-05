@@ -66,11 +66,14 @@ export async function POST(request: Request) {
 
     return NextResponse.json(result);
   } catch (error) {
-    const message =
-      error instanceof Error
-        ? error.message
-        : "의심 문자 분석 중 알 수 없는 오류가 발생했습니다.";
+    console.error("SMS analysis API error:", error);
 
-    return NextResponse.json({ message }, { status: 500 });
+    return NextResponse.json(
+      {
+        message:
+          "의심 문자 분석 서비스가 일시적으로 지연되고 있습니다. 잠시 후 다시 시도해 주세요.",
+      },
+      { status: 500 }
+    );
   }
 }
