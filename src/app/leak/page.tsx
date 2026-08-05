@@ -5,6 +5,7 @@ import { PDFDocument, rgb } from "pdf-lib";
 import fontkit from "@pdf-lib/fontkit";
 import { extractTextFromImage } from "../../lib/ocr";
 import type { LeakAnalysisResult } from "../../types/analysis";
+import ReportSummaryPanel from "./components/ReportSummaryPanel";
 
 const sampleText = `개인정보 유출 안내
 
@@ -961,15 +962,9 @@ export default function LeakPage() {
                         >
                           PDF 저장
                         </button>
-
-                        <button
-                          className="small-btn"
-                          onClick={showComingSoon}
-                        >
-                          신고용 요약문 생성
-                        </button>
-                      </div>
+                     </div>
                     </article>
+                    <ReportSummaryPanel analysisResult={result} />
                   </div>
                 </>
               )}
