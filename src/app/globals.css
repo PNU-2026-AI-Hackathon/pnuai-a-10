@@ -1869,3 +1869,19 @@ textarea:focus {
   height: 17px;
   fill: #191919;
 }
+
+/* Keep every visual action consistent with the pill-shaped button language. */
+button:not(.nav-text-button):not(.guide-link),
+.primary-btn,
+.secondary-btn,
+.ghost-btn,
+.small-btn,
+.nav-button,
+.language-btn,
+.login-btn,
+.start-button,
+.start-main-button,
+.banner-link-btn,
+.banner-menu a {
+  border-radius: 999px;
+}
