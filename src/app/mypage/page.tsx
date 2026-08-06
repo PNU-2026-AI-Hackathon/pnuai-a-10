@@ -92,13 +92,13 @@ export default function MyPage() {
     return (
       <main className="analysis-page">
         <header className="nav">
-          <a href="/" className="brand">
+          <a href="/banner" className="brand">
             <span className="brand-badge">L</span>
             <span>LeakCare</span>
           </a>
 
           <nav className="nav-menu" aria-label="주요 메뉴">
-            <a href="/#guide">이용 안내</a>
+            <a href="/banner#guide">이용 안내</a>
             <a href="/leak">유출 안내문 분석</a>
             <a href="/sms">의심 문자 분석</a>
             <a href="/login">로그인</a>
@@ -120,13 +120,13 @@ export default function MyPage() {
   return (
     <main className="analysis-page">
       <header className="nav">
-        <a href="/" className="brand">
+        <a href="/banner" className="brand">
           <span className="brand-badge">L</span>
           <span>LeakCare</span>
         </a>
 
         <nav className="nav-menu" aria-label="주요 메뉴">
-          <a href="/#guide">이용 안내</a>
+          <a href="/banner#guide">이용 안내</a>
           <a href="/leak">유출 안내문 분석</a>
           <a href="/sms">의심 문자 분석</a>
           <a href="/login">로그인</a>

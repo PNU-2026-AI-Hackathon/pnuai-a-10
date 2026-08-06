@@ -5,7 +5,7 @@ export default function manifest(): MetadataRoute.Manifest {
     name: "LeakCare",
     short_name: "LeakCare",
     description: "개인정보 유출 및 의심 문자 대응 서비스",
-    start_url: "/",
+    start_url: "/banner",
     display: "standalone",
     background_color: "#ffffff",
     theme_color: "#4F46E5",

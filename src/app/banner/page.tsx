@@ -11,7 +11,7 @@ export default function BannerPage() {
   return (
     <div className="page">
       <header className="nav">
-        <a href="/" className="brand">
+        <a href="/banner" className="brand">
           <span className="brand-badge">L</span>
           <span>LeakCare</span>
         </a>

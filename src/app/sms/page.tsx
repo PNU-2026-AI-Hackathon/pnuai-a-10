@@ -90,7 +90,7 @@ export default function SmsPage() {
   return (
     <main className="analysis-page">
       <header className="nav">
-        <a href="/" className="brand">
+        <a href="/banner" className="brand">
           <span className="brand-badge">L</span>
           <span>LeakCare</span>
         </a>
