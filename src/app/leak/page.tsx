@@ -4,7 +4,12 @@ import { useState } from "react";
 import { PDFDocument, rgb } from "pdf-lib";
 import fontkit from "@pdf-lib/fontkit";
 import { extractTextFromImage } from "../../lib/ocr";
-import type { LeakAnalysisResult } from "../../types/analysis";
+import { supportAgencyLinks } from "../../data/providerLinks";
+import type {
+  ActionLink,
+  ChecklistItem,
+  LeakAnalysisResult,
+} from "../../types/analysis";
 import ReportSummaryPanel from "./components/ReportSummaryPanel";
 
 const sampleText = `개인정보 유출 안내
@@ -166,6 +171,95 @@ function RiskGauge({ riskLevel, riskScore }: RiskGaugeProps) {
   );
 }
 
+type ShortcutItem = {
+  id: string;
+  label: string;
+  description: string;
+  url?: string;
+  phone?: string;
+};
+
+function isValidShortcutUrl(url: string | undefined): url is string {
+  if (!url?.trim()) {
+    return false;
+  }
+
+  try {
+    const parsedUrl = new URL(url);
+    return parsedUrl.protocol === "https:" || parsedUrl.protocol === "http:";
+  } catch {
+    return false;
+  }
+}
+
+function toShortcutItem(
+  id: string,
+  link: ActionLink,
+  fallbackDescription: string
+): ShortcutItem | null {
+  if (!isValidShortcutUrl(link.url)) {
+    return null;
+  }
+
+  return {
+    id,
+    label: link.label,
+    description: link.description ?? fallbackDescription,
+    url: link.url,
+  };
+}
+
+function buildShortcutLinks(checklist: ChecklistItem[]): ShortcutItem[] {
+  const shortcuts: ShortcutItem[] = [];
+  const seenUrls = new Set<string>();
+
+  const addShortcut = (shortcut: ShortcutItem) => {
+    if (shortcut.url) {
+      const normalizedUrl = shortcut.url.trim().toLowerCase();
+
+      if (seenUrls.has(normalizedUrl)) {
+        return;
+      }
+
+      seenUrls.add(normalizedUrl);
+    }
+
+    shortcuts.push(shortcut);
+  };
+
+  supportAgencyLinks.forEach((link, index) => {
+    if (link.url && !isValidShortcutUrl(link.url)) {
+      return;
+    }
+
+    addShortcut({
+      id: `support-${index}`,
+      label: link.label,
+      description: link.description,
+      url: link.url,
+      phone: link.phone,
+    });
+  });
+
+  checklist.forEach((item, index) => {
+    if (!item.link) {
+      return;
+    }
+
+    const shortcut = toShortcutItem(
+      `checklist-${item.id}-${index}`,
+      item.link,
+      item.title
+    );
+
+    if (shortcut) {
+      addShortcut(shortcut);
+    }
+  });
+
+  return shortcuts;
+}
+
 export default function LeakPage() {
   const [text, setText] = useState("");
   const [loading, setLoading] = useState(false);
@@ -173,6 +267,7 @@ export default function LeakPage() {
   const [ocrLoading, setOcrLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [result, setResult] = useState<LeakAnalysisResult | null>(null);
+  const shortcutLinks = result ? buildShortcutLinks(result.checklist) : [];
 
   const analyze = async () => {
     if (!text.trim()) {
@@ -821,25 +916,110 @@ export default function LeakPage() {
                               {item.description}
                             </span>
 
-                            {item.link && (
-                              <a
-                                className="small-btn"
-                                href={item.link.url}
-                                target="_blank"
-                                rel="noreferrer"
-                                style={{
-                                  whiteSpace: "nowrap",
-                                  width: "fit-content",
-                                  minWidth: "88px",
-                                  textAlign: "center",
-                                }}
-                              >
-                                바로가기
-                              </a>
-                            )}
                           </li>
                         ))}
                       </ul>
+                    </article>
+
+                    <article className="info-card full">
+                      <h4>
+                        <span className="icon-dot"></span> 바로가기 및 신고·상담 기관
+                      </h4>
+
+                      {shortcutLinks.length ? (
+                        <div
+                          style={{
+                            marginTop: "14px",
+                            padding: "4px 18px",
+                            border: "1px solid #e3e6eb",
+                            borderRadius: "14px",
+                            background: "#f5f6f8",
+                          }}
+                        >
+                          {shortcutLinks.map((shortcut, index) => (
+                            <div
+                              key={shortcut.id}
+                              style={{
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "space-between",
+                                gap: "18px",
+                                padding: "15px 0",
+                                borderBottom:
+                                  index === shortcutLinks.length - 1
+                                    ? "none"
+                                    : "1px solid #dde1e7",
+                              }}
+                            >
+                              <div style={{ minWidth: 0 }}>
+                                <strong
+                                  style={{
+                                    display: "block",
+                                    marginBottom: "4px",
+                                    fontSize: "14px",
+                                  }}
+                                >
+                                  {shortcut.label}
+                                </strong>
+                                <span
+                                  style={{
+                                    display: "block",
+                                    fontSize: "13px",
+                                    lineHeight: 1.55,
+                                    color: "#626977",
+                                  }}
+                                >
+                                  {shortcut.description}
+                                </span>
+                                {shortcut.phone && (
+                                  <span
+                                    style={{
+                                      display: "block",
+                                      marginTop: "4px",
+                                      fontSize: "12px",
+                                      fontWeight: 800,
+                                      color: "#475569",
+                                    }}
+                                  >
+                                    {shortcut.phone}
+                                  </span>
+                                )}
+                              </div>
+
+                              {shortcut.url ? (
+                                <a
+                                  href={shortcut.url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  style={{
+                                    flexShrink: 0,
+                                    color: "inherit",
+                                    fontSize: "13px",
+                                    fontWeight: 700,
+                                    textDecoration: "underline",
+                                    textUnderlineOffset: "3px",
+                                  }}
+                                >
+                                  바로가기
+                                </a>
+                              ) : (
+                                <span
+                                  style={{
+                                    flexShrink: 0,
+                                    color: "#7a808c",
+                                    fontSize: "13px",
+                                    fontWeight: 700,
+                                  }}
+                                >
+                                  URL 보류
+                                </span>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <p>연결된 바로가기 및 신고·상담 기관이 없습니다.</p>
+                      )}
                     </article>
 
                     <article className="info-card full">
@@ -897,7 +1077,7 @@ export default function LeakPage() {
                                 <a
                                   href={source.url}
                                   target="_blank"
-                                  rel="noreferrer"
+                                  rel="noopener noreferrer"
                                   style={{
                                     flexShrink: 0,
                                     color: "inherit",
