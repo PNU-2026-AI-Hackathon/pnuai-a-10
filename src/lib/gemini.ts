@@ -133,7 +133,8 @@ function parseJsonFromGemini<T>(text: string): T {
 }
 
 async function callGeminiJson<T>(
-  prompt: string
+  prompt: string,
+  signal?: AbortSignal
 ): Promise<T> {
   const apiKey = getGeminiApiKey();
   const model =
@@ -158,6 +159,7 @@ async function callGeminiJson<T>(
           responseMimeType: "application/json",
         },
       }),
+      signal,
       cache: "no-store",
     }
   );
@@ -188,7 +190,8 @@ async function callGeminiJson<T>(
 }
 
 export async function extractKeyInfo(
-  inputText: string
+  inputText: string,
+  signal?: AbortSignal
 ): Promise<ExtractedKeyInfo> {
   const prompt = `
 너는 개인정보 유출 안내문을 분석하는 보안 도우미다.
@@ -227,7 +230,7 @@ ${inputText}
   const result =
     await callGeminiJson<
       Partial<ExtractedKeyInfo>
-    >(prompt);
+    >(prompt, signal);
 
   const leakedItems = uniqueStringArray(
     result.leakedItems
@@ -280,7 +283,8 @@ export async function analyzeWithSearchContext(
     inputText: string;
     extracted: ExtractedKeyInfo;
     searchResults: NaverNewsResult[];
-  }
+  },
+  signal?: AbortSignal
 ): Promise<LeakFinalText> {
   const {
     inputText,
@@ -389,7 +393,7 @@ ${evidenceText || "검색 결과 없음"}
   const result =
     await callGeminiJson<
       Partial<LeakFinalText>
-    >(prompt);
+    >(prompt, signal);
 
   const allowedRiskTypes = new Set(
     extracted.riskTypes
@@ -437,7 +441,8 @@ ${evidenceText || "검색 결과 없음"}
 }
 
 export async function analyzeSuspiciousMessage(
-  inputText: string
+  inputText: string,
+  signal?: AbortSignal
 ): Promise<SmsAnalysisResult> {
   const prompt = `
 너는 스미싱/피싱 의심 문자를 분석하는 보안 도우미다.
@@ -479,7 +484,7 @@ ${inputText}
       isSmishing?: boolean;
       riskTypes?: string[];
       reason?: string;
-    }>(prompt);
+    }>(prompt, signal);
 
   const riskLevel = normalizeRiskLevel(
     result.riskLevel

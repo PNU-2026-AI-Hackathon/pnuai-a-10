@@ -2,12 +2,16 @@ import { NextResponse } from "next/server";
 
 import { buildReportSummaryTemplate } from "../../../lib/reportSummary";
 import { generateReportSummaryWithGemini } from "../../../lib/reportSummaryGemini";
+import { TimeoutError, withTimeout } from "../../../lib/timeout";
 import { createPersonalInfoTokenMasker } from "../../../utils/personalInfoMasking";
 
 import type {
   ReportDamageStatus,
   ReportSummaryRequest,
 } from "../../../types/analysis";
+
+const MAX_REPORT_SUMMARY_INPUT_LENGTH = 20_000;
+const GEMINI_REPORT_SUMMARY_TIMEOUT_MS = 30_000;
 
 function isRecord(
   value: unknown
@@ -17,6 +21,48 @@ function isRecord(
     value !== null &&
     !Array.isArray(value)
   );
+}
+
+function countStringCharacters(
+  value: unknown
+): number {
+  if (typeof value === "string") {
+    return value.length;
+  }
+
+  if (Array.isArray(value)) {
+    return value.reduce<number>(
+      (total, item) =>
+        total + countStringCharacters(item),
+      0
+    );
+  }
+
+  if (isRecord(value)) {
+    return Object.values(value).reduce<number>(
+      (total, item) =>
+        total + countStringCharacters(item),
+      0
+    );
+  }
+
+  return 0;
+}
+
+async function runWithTimeout<T>(
+  operation: (signal: AbortSignal) => Promise<T>,
+  timeoutMs: number
+): Promise<T> {
+  const controller = new AbortController();
+
+  try {
+    return await withTimeout(
+      operation(controller.signal),
+      timeoutMs
+    );
+  } finally {
+    controller.abort();
+  }
 }
 
 function readString(
@@ -151,6 +197,19 @@ export async function POST(
       );
     }
 
+    if (
+      countStringCharacters(body) >
+      MAX_REPORT_SUMMARY_INPUT_LENGTH
+    ) {
+      return NextResponse.json(
+        {
+          message:
+            "요약문 작성 내용이 너무 깁니다. 입력 내용을 줄여 주세요.",
+        },
+        { status: 400 }
+      );
+    }
+
     if (!isDamageStatus(body.damageStatus)) {
       return NextResponse.json(
         {
@@ -259,9 +318,14 @@ export async function POST(
       };
 
       const generated =
-        await generateReportSummaryWithGemini(
-          maskedReportInput,
-          maskedTemplate
+        await runWithTimeout(
+          (signal) =>
+            generateReportSummaryWithGemini(
+              maskedReportInput,
+              maskedTemplate,
+              signal
+            ),
+          GEMINI_REPORT_SUMMARY_TIMEOUT_MS
         );
 
       return NextResponse.json({
@@ -298,10 +362,14 @@ export async function POST(
     } catch (geminiError) {
       // Gemini 오류가 발생해도 API 전체를 실패시키지 않고
       // 기존 템플릿 결과를 그대로 반환합니다.
-      console.error(
-        "Report summary Gemini error:",
-        geminiError
-      );
+      if (geminiError instanceof TimeoutError) {
+        console.error("Report summary Gemini timeout");
+      } else {
+        console.error(
+          "Report summary Gemini error:",
+          geminiError
+        );
+      }
 
       return NextResponse.json(template);
     }

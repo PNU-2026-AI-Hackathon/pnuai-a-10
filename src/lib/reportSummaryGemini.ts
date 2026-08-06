@@ -69,7 +69,8 @@ function readGeneratedText(
 }
 
 async function callGeminiForReport(
-  prompt: string
+  prompt: string,
+  signal?: AbortSignal
 ): Promise<GeminiReportSummaryResult> {
   const apiKey = getGeminiApiKey();
 
@@ -105,6 +106,7 @@ async function callGeminiForReport(
         },
       }),
 
+      signal,
       cache: "no-store",
     }
   );
@@ -141,7 +143,8 @@ async function callGeminiForReport(
 
 export async function generateReportSummaryWithGemini(
   input: ReportSummaryRequest,
-  template: ReportSummaryResponse
+  template: ReportSummaryResponse,
+  signal?: AbortSignal
 ): Promise<ReportSummaryResponse> {
   const prompt = `
 너는 개인정보 유출 사건의 신고·상담용 요약문을 정리하는 문서 작성 도우미다.
@@ -188,7 +191,7 @@ ${JSON.stringify(template, null, 2)}
 `;
 
   const generated =
-    await callGeminiForReport(prompt);
+    await callGeminiForReport(prompt, signal);
 
   const generatedSections =
     generated.sections ?? {};
