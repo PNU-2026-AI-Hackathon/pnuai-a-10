@@ -117,3 +117,34 @@ export const providerLinks = {
     description: "토스 계정의 개인정보 이용내역을 확인합니다.",
   },
 } satisfies Record<string, ActionLink>;
+
+export type SupportAgencyLink = {
+  label: string;
+  description: string;
+  url?: string;
+  phone?: string;
+};
+
+export const supportAgencyLinks: SupportAgencyLink[] = [
+  {
+    label: "개인정보침해 신고·상담",
+    description: providerLinks.privacyReport.description ?? "",
+    url: providerLinks.privacyReport.url,
+  },
+  {
+    label: "KISA 118 또는 보호나라",
+    description: providerLinks.kisaBoho.description ?? "",
+    url: providerLinks.kisaBoho.url,
+  },
+  {
+    label: "경찰청 사이버범죄 신고",
+    description: providerLinks.policeCyber.description ?? "",
+    url: providerLinks.policeCyber.url,
+  },
+  {
+    label: "금융감독원 금융 피해 상담",
+    description:
+      "현재 저장소에 공식 URL이 정의되어 있지 않아 바로가기 연결을 보류했습니다.",
+    // TODO: 금융감독원 금융 피해 상담 공식 URL이 확인되면 연결합니다.
+  },
+];
