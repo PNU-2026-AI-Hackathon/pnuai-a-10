@@ -141,10 +141,4 @@ export const supportAgencyLinks: SupportAgencyLink[] = [
     description: providerLinks.policeCyber.description ?? "",
     url: providerLinks.policeCyber.url,
   },
-  {
-    label: "금융감독원 금융 피해 상담",
-    description:
-      "현재 저장소에 공식 URL이 정의되어 있지 않아 바로가기 연결을 보류했습니다.",
-    // TODO: 금융감독원 금융 피해 상담 공식 URL이 확인되면 연결합니다.
-  },
 ];

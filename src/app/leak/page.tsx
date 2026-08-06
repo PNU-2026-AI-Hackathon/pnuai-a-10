@@ -1,10 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type CSSProperties } from "react";
 import { PDFDocument, rgb } from "pdf-lib";
 import fontkit from "@pdf-lib/fontkit";
 import { extractTextFromImage } from "../../lib/ocr";
-import { supportAgencyLinks } from "../../data/providerLinks";
+import {
+  providerLinks,
+  supportAgencyLinks,
+} from "../../data/providerLinks";
 import type {
   ActionLink,
   ChecklistItem,
@@ -179,6 +182,155 @@ type ShortcutItem = {
   phone?: string;
 };
 
+type ShortcutGroup = {
+  id: string;
+  label: string;
+  description: string;
+  links: ShortcutItem[];
+};
+
+const shortcutPanelStyle: CSSProperties = {
+  marginTop: "14px",
+  padding: "4px 18px",
+  border: "1px solid #ddd6fe",
+  borderRadius: "14px",
+  background: "linear-gradient(135deg, #EEF2FF 0%, #EDE9FE 100%)",
+};
+
+const shortcutRowTextStyle: CSSProperties = {
+  display: "block",
+  fontSize: "13px",
+  lineHeight: 1.55,
+  color: "#626977",
+};
+
+const shortcutActionStyle: CSSProperties = {
+  flexShrink: 0,
+  color: "inherit",
+  fontSize: "13px",
+  fontWeight: 700,
+  textDecoration: "underline",
+  textUnderlineOffset: "3px",
+};
+
+const accountShortcutStyles = `
+.shortcut-action-link:hover,
+.shortcut-action-link:focus-visible {
+  color: #4f46e5;
+  outline: 2px solid #4f46e5;
+  outline-offset: 3px;
+}
+
+.account-shortcut-group {
+  display: flex;
+  overflow: hidden;
+  border: 1px solid #ddd6fe;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #EEF2FF 0%, #EDE9FE 100%);
+  margin: 12px 0;
+}
+
+.account-shortcut-link {
+  flex: 1 1 0;
+  min-width: 0;
+  padding: 14px 16px;
+  color: #4338ca;
+  text-decoration: none;
+}
+
+.account-shortcut-link + .account-shortcut-link {
+  border-left: 1px solid #ddd6fe;
+}
+
+.account-shortcut-link:hover,
+.account-shortcut-link:focus-visible {
+  background: #EDE9FE;
+  color: #4f46e5;
+  outline: none;
+}
+
+.account-shortcut-link strong,
+.account-shortcut-link span {
+  display: block;
+}
+
+.account-shortcut-link strong {
+  margin-bottom: 5px;
+  font-size: 14px;
+}
+
+.account-shortcut-link span {
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+@media (max-width: 520px) {
+  .account-shortcut-group {
+    flex-direction: column;
+  }
+
+  .account-shortcut-link + .account-shortcut-link {
+    border-left: 0;
+    border-top: 1px solid #ddd6fe;
+  }
+}
+`;
+
+function renderShortcutRows(shortcuts: ShortcutItem[]) {
+  return shortcuts.map((shortcut, index) => (
+    <div
+      key={shortcut.id}
+      style={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        gap: "18px",
+        padding: "15px 0",
+        borderBottom:
+          index === shortcuts.length - 1 ? "none" : "1px solid #dde1e7",
+      }}
+    >
+      <div style={{ minWidth: 0 }}>
+        <strong
+          style={{
+            display: "block",
+            marginBottom: "4px",
+            fontSize: "14px",
+          }}
+        >
+          {shortcut.label}
+        </strong>
+        <span style={shortcutRowTextStyle}>{shortcut.description}</span>
+        {shortcut.phone && (
+          <span
+            style={{
+              display: "block",
+              marginTop: "4px",
+              fontSize: "12px",
+              fontWeight: 800,
+              color: "#475569",
+            }}
+          >
+            {shortcut.phone}
+          </span>
+        )}
+      </div>
+
+      {shortcut.url && (
+        <a
+          href={shortcut.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="shortcut-action-link"
+          style={shortcutActionStyle}
+        >
+          바로가기
+        </a>
+      )}
+    </div>
+  ));
+}
+
 function isValidShortcutUrl(url: string | undefined): url is string {
   if (!url?.trim()) {
     return false;
@@ -191,6 +343,28 @@ function isValidShortcutUrl(url: string | undefined): url is string {
     return false;
   }
 }
+
+const accountSecurityChecklistIds = new Set([
+  "email-password-change",
+  "email-two-factor",
+  "account-login-check-google",
+  "account-login-check-naver",
+  "account-login-check-kakao",
+  "password-change-all",
+]);
+
+const accountSecurityLinkUrls = new Set(
+  [
+    providerLinks.googleSecurity.url,
+    providerLinks.naverLoginHistory.url,
+  ].map((url) => url.trim().toLowerCase())
+);
+
+const supportAgencyLinkUrls = new Set(
+  supportAgencyLinks
+    .map((link) => link.url?.trim().toLowerCase())
+    .filter((url): url is string => Boolean(url))
+);
 
 function toShortcutItem(
   id: string,
@@ -209,9 +383,32 @@ function toShortcutItem(
   };
 }
 
-function buildShortcutLinks(checklist: ChecklistItem[]): ShortcutItem[] {
+function hasAccountSecurityChecklist(checklist: ChecklistItem[]): boolean {
+  return checklist.some((item) => {
+    if (accountSecurityChecklistIds.has(item.id)) {
+      return true;
+    }
+
+    const linkUrl = item.link?.url.trim().toLowerCase();
+
+    return Boolean(linkUrl && accountSecurityLinkUrls.has(linkUrl));
+  });
+}
+
+function buildShortcutLinks(checklist: ChecklistItem[]): {
+  accountSecurityGroup?: ShortcutGroup;
+  shortcuts: ShortcutItem[];
+} {
   const shortcuts: ShortcutItem[] = [];
   const seenUrls = new Set<string>();
+  const shouldShowAccountSecurityGroup =
+    hasAccountSecurityChecklist(checklist);
+
+  if (shouldShowAccountSecurityGroup) {
+    accountSecurityLinkUrls.forEach((url) => seenUrls.add(url));
+  }
+
+  supportAgencyLinkUrls.forEach((url) => seenUrls.add(url));
 
   const addShortcut = (shortcut: ShortcutItem) => {
     if (shortcut.url) {
@@ -226,20 +423,6 @@ function buildShortcutLinks(checklist: ChecklistItem[]): ShortcutItem[] {
 
     shortcuts.push(shortcut);
   };
-
-  supportAgencyLinks.forEach((link, index) => {
-    if (link.url && !isValidShortcutUrl(link.url)) {
-      return;
-    }
-
-    addShortcut({
-      id: `support-${index}`,
-      label: link.label,
-      description: link.description,
-      url: link.url,
-      phone: link.phone,
-    });
-  });
 
   checklist.forEach((item, index) => {
     if (!item.link) {
@@ -257,7 +440,33 @@ function buildShortcutLinks(checklist: ChecklistItem[]): ShortcutItem[] {
     }
   });
 
-  return shortcuts;
+  const accountSecurityGroup = shouldShowAccountSecurityGroup
+    ? {
+        id: "account-security-shortcuts",
+        label: "주요 계정 보안 확인",
+        description:
+          "사용 중인 이메일·계정 서비스를 직접 골라 보안 상태와 로그인 기록을 확인하세요.",
+        links: [
+          {
+            id: "account-security-google",
+            label: providerLinks.googleSecurity.label,
+            description: providerLinks.googleSecurity.description ?? "",
+            url: providerLinks.googleSecurity.url,
+          },
+          {
+            id: "account-security-naver",
+            label: providerLinks.naverLoginHistory.label,
+            description: providerLinks.naverLoginHistory.description ?? "",
+            url: providerLinks.naverLoginHistory.url,
+          },
+        ].filter((link) => isValidShortcutUrl(link.url)),
+      }
+    : undefined;
+
+  return {
+    accountSecurityGroup,
+    shortcuts,
+  };
 }
 
 export default function LeakPage() {
@@ -267,7 +476,19 @@ export default function LeakPage() {
   const [ocrLoading, setOcrLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const [result, setResult] = useState<LeakAnalysisResult | null>(null);
-  const shortcutLinks = result ? buildShortcutLinks(result.checklist) : [];
+  const {
+    accountSecurityGroup,
+    shortcuts: shortcutLinks,
+  } = result ? buildShortcutLinks(result.checklist) : { shortcuts: [] };
+  const supportShortcutLinks = supportAgencyLinks
+    .filter((link) => isValidShortcutUrl(link.url))
+    .map((link, index) => ({
+      id: `support-${index}`,
+      label: link.label,
+      description: link.description,
+      url: link.url,
+      phone: link.phone,
+    }));
 
   const analyze = async () => {
     if (!text.trim()) {
@@ -786,6 +1007,7 @@ export default function LeakPage() {
 
               {showResult && result && (
                 <>
+                  <style>{accountShortcutStyles}</style>
                   <div className="result-top result-top-complete">
                     <div>
                       <h3>유출 안내문 분석 결과</h3>
@@ -915,111 +1137,48 @@ export default function LeakPage() {
                               <br />
                               {item.description}
                             </span>
-
                           </li>
                         ))}
                       </ul>
                     </article>
 
-                    <article className="info-card full">
-                      <h4>
-                        <span className="icon-dot"></span> 바로가기 및 신고·상담 기관
-                      </h4>
+                    {(accountSecurityGroup || shortcutLinks.length > 0) && (
+                      <article className="info-card full">
+                        <h4>
+                          <span className="icon-dot"></span> 맞춤 바로가기
+                        </h4>
 
-                      {shortcutLinks.length ? (
-                        <div
-                          style={{
-                            marginTop: "14px",
-                            padding: "4px 18px",
-                            border: "1px solid #e3e6eb",
-                            borderRadius: "14px",
-                            background: "#f5f6f8",
-                          }}
-                        >
-                          {shortcutLinks.map((shortcut, index) => (
-                            <div
-                              key={shortcut.id}
-                              style={{
-                                display: "flex",
-                                alignItems: "center",
-                                justifyContent: "space-between",
-                                gap: "18px",
-                                padding: "15px 0",
-                                borderBottom:
-                                  index === shortcutLinks.length - 1
-                                    ? "none"
-                                    : "1px solid #dde1e7",
-                              }}
-                            >
-                              <div style={{ minWidth: 0 }}>
-                                <strong
-                                  style={{
-                                    display: "block",
-                                    marginBottom: "4px",
-                                    fontSize: "14px",
-                                  }}
-                                >
-                                  {shortcut.label}
-                                </strong>
-                                <span
-                                  style={{
-                                    display: "block",
-                                    fontSize: "13px",
-                                    lineHeight: 1.55,
-                                    color: "#626977",
-                                  }}
-                                >
-                                  {shortcut.description}
-                                </span>
-                                {shortcut.phone && (
-                                  <span
-                                    style={{
-                                      display: "block",
-                                      marginTop: "4px",
-                                      fontSize: "12px",
-                                      fontWeight: 800,
-                                      color: "#475569",
-                                    }}
-                                  >
-                                    {shortcut.phone}
-                                  </span>
-                                )}
-                              </div>
-
-                              {shortcut.url ? (
+                        <div style={shortcutPanelStyle}>
+                          {accountSecurityGroup && (
+                            <div className="account-shortcut-group">
+                              {accountSecurityGroup.links.map((link) => (
                                 <a
-                                  href={shortcut.url}
+                                  key={link.id}
+                                  href={link.url}
                                   target="_blank"
                                   rel="noopener noreferrer"
-                                  style={{
-                                    flexShrink: 0,
-                                    color: "inherit",
-                                    fontSize: "13px",
-                                    fontWeight: 700,
-                                    textDecoration: "underline",
-                                    textUnderlineOffset: "3px",
-                                  }}
+                                  className="account-shortcut-link"
                                 >
-                                  바로가기
+                                  <strong>{link.label}</strong>
+                                  <span>{link.description}</span>
                                 </a>
-                              ) : (
-                                <span
-                                  style={{
-                                    flexShrink: 0,
-                                    color: "#7a808c",
-                                    fontSize: "13px",
-                                    fontWeight: 700,
-                                  }}
-                                >
-                                  URL 보류
-                                </span>
-                              )}
+                              ))}
                             </div>
-                          ))}
+                          )}
+
+                          {renderShortcutRows(shortcutLinks)}
                         </div>
-                      ) : (
-                        <p>연결된 바로가기 및 신고·상담 기관이 없습니다.</p>
-                      )}
+                      </article>
+                    )}
+
+                    <article className="info-card full">
+                      <h4>
+                        <span className="icon-dot"></span> 신고·상담 기관
+                      </h4>
+
+                      <div style={shortcutPanelStyle}>
+                        {renderShortcutRows(supportShortcutLinks)}
+                      </div>
                     </article>
 
                     <article className="info-card full">
