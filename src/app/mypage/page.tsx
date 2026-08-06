@@ -25,6 +25,9 @@ export default function MyPage() {
   const [history, setHistory] = useState<HistoryItem[]>([]);
   const [historyLoading, setHistoryLoading] = useState(false);
   const [historyError, setHistoryError] = useState("");
+  const [expandedHistoryId, setExpandedHistoryId] = useState<string | null>(
+    null
+  );
 
   useEffect(() => {
     const supabase = createBrowserSupabaseClient();
@@ -254,10 +257,19 @@ export default function MyPage() {
                                 padding: "18px 20px",
                                 minHeight: "auto",
                                 display: "flex",
-                                alignItems: "center",
-                                gap: "20px",
+                                flexDirection: "column",
+                                alignItems: "stretch",
+                                gap: "16px",
                               }}
                             >
+                              <div
+                              style={{
+                                display: "flex",
+                                alignItems: "center",
+                                gap: "20px",
+                              
+                              }}
+                              >
                               <span
                                 style={{
                                   flex: 1,
@@ -332,6 +344,255 @@ export default function MyPage() {
                                   진행률
                                 </small>
                               </span>
+                              </div>
+                              <button
+                                type="button"
+                                className="small-btn"
+                                onClick={() =>
+                                  setExpandedHistoryId((currentId) =>
+                                    currentId === item.id ? null : item.id
+                                  )
+                                }
+                                aria-expanded={expandedHistoryId === item.id}
+                                aria-controls={`history-detail-${item.id}`}
+                                style={{
+                                  alignSelf: "flex-end",
+                                }}
+                              >
+                                {expandedHistoryId === item.id ? "상세 닫기" : "상세 보기"}
+                              </button>
+                              {expandedHistoryId === item.id && (
+                                <div
+                                  id={`history-detail-${item.id}`}
+                                  style={{
+                                    width: "100%",
+                                    borderTop: "1px solid #cbd5e1",
+                                    paddingTop: "16px",
+                                    display: "flex",
+                                    flexDirection: "column",
+                                    gap: "16px",
+                                  }}
+                                >
+                                  {item.resultSummary && (
+                                    <section>
+                                      <h5
+                                        style={{
+                                          margin: "0 0 8px",
+                                          fontSize: "15px",
+                                          color: "#1e293b",
+                                        }}
+                                      >
+                                        분석 요약
+                                      </h5>
+
+                                      <p
+                                        style={{
+                                          margin: 0,
+                                          color: "#475569",
+                                          lineHeight: 1.6,
+                                          whiteSpace: "pre-wrap",
+                                          wordBreak: "break-word",
+                                        }}
+                                      >
+                                        {item.resultSummary}
+                                      </p>
+                                    </section>
+                                  )}
+
+                                  {item.leakedItems && item.leakedItems.length > 0 && (
+                                    <section>
+                                      <h5
+                                        style={{
+                                          margin: "0 0 8px",
+                                          fontSize: "15px",
+                                          color: "#1e293b",
+                                        }}
+                                      >
+                                        유출된 개인정보
+                                      </h5>
+
+                                      <div
+                                        style={{
+                                          display: "flex",
+                                          flexWrap: "wrap",
+                                          gap: "8px",
+                                        }}
+                                      >
+                                        {item.leakedItems.map((leakedItem) => (
+                                          <span
+                                            key={leakedItem}
+                                            style={{
+                                              padding: "6px 10px",
+                                              borderRadius: "999px",
+                                              background: "#ffffff",
+                                              border: "1px solid #c7d2fe",
+                                              fontSize: "13px",
+                                              color: "#4338ca",
+                                            }}
+                                          >
+                                            {leakedItem}
+                                          </span>
+                                        ))}
+                                      </div>
+                                    </section>
+                                  )}
+
+                                  {item.riskTypes && item.riskTypes.length > 0 && (
+                                    <section>
+                                      <h5
+                                        style={{
+                                          margin: "0 0 8px",
+                                          fontSize: "15px",
+                                          color: "#1e293b",
+                                        }}
+                                      >
+                                        {item.type === "leak" ? "예상되는 위험" : "탐지된 위험 유형"}
+                                      </h5>
+
+                                      <div
+                                        style={{
+                                          display: "flex",
+                                          flexWrap: "wrap",
+                                          gap: "8px",
+                                        }}
+                                      >
+                                        {item.riskTypes.map((riskType) => (
+                                          <span
+                                            key={riskType}
+                                            style={{
+                                              padding: "6px 10px",
+                                              borderRadius: "999px",
+                                              background: "#fff7ed",
+                                              border: "1px solid #fed7aa",
+                                              fontSize: "13px",
+                                              color: "#c2410c",
+                                            }}
+                                          >
+                                            {riskType}
+                                          </span>
+                                        ))}
+                                      </div>
+                                    </section>
+                                  )}
+                                  {Array.isArray(item.checklist) && item.checklist.length > 0 && (
+                                    <section>
+                                      <h5
+                                        style={{
+                                          margin: "0 0 8px",
+                                          fontSize: "15px",
+                                          color: "#1e293b",
+                                        }}
+                                      >
+                                        대응 체크리스트
+                                      </h5>
+
+                                      <div
+                                        style={{
+                                          display: "flex",
+                                          flexDirection: "column",
+                                          gap: "10px",
+                                        }}
+                                      >
+                                        {item.checklist.map((checkItem, index) => {
+                                          if (
+                                            typeof checkItem !== "object" ||
+                                            checkItem === null ||
+                                            !("title" in checkItem)
+                                          ) {
+                                            return null;
+                                          }
+
+                                          const itemData = checkItem as {
+                                            id?: string;
+                                            priority?: string;
+                                            title?: string;
+                                            description?: string;
+                                            isCompleted?: boolean;
+                                          };
+
+                                          return (
+                                            <div
+                                              key={itemData.id ?? `${item.id}-check-${index}`}
+                                              style={{
+                                                padding: "12px 14px",
+                                                borderRadius: "12px",
+                                                background: "#ffffff",
+                                                border: "1px solid #e2e8f0",
+                                              }}
+                                            >
+                                              <div
+                                                style={{
+                                                  display: "flex",
+                                                  alignItems: "center",
+                                                  gap: "8px",
+                                                  marginBottom: itemData.description ? "6px" : 0,
+                                                }}
+                                              >
+                                                <span
+                                                  aria-hidden="true"
+                                                  style={{
+                                                    width: "18px",
+                                                    height: "18px",
+                                                    borderRadius: "50%",
+                                                    border: itemData.isCompleted
+                                                      ? "1px solid #4f46e5"
+                                                      : "1px solid #94a3b8",
+                                                    background: itemData.isCompleted ? "#4f46e5" : "#ffffff",
+                                                    color: "#ffffff",
+                                                    display: "inline-flex",
+                                                    alignItems: "center",
+                                                    justifyContent: "center",
+                                                    fontSize: "12px",
+                                                    flexShrink: 0,
+                                                  }}
+                                                >
+                                                  {itemData.isCompleted ? "✓" : ""}
+                                                </span>
+
+                                                <strong
+                                                  style={{
+                                                    color: "#1e293b",
+                                                    fontSize: "14px",
+                                                  }}
+                                                >
+                                                  {itemData.title}
+                                                </strong>
+
+                                                {itemData.priority && (
+                                                  <span
+                                                    style={{
+                                                      marginLeft: "auto",
+                                                      fontSize: "12px",
+                                                      color: "#64748b",
+                                                    }}
+                                                  >
+                                                    {itemData.priority}
+                                                  </span>
+                                                )}
+                                              </div>
+
+                                              {itemData.description && (
+                                                <p
+                                                  style={{
+                                                    margin: 0,
+                                                    paddingLeft: "26px",
+                                                    color: "#64748b",
+                                                    fontSize: "13px",
+                                                    lineHeight: 1.5,
+                                                    wordBreak: "break-word",
+                                                  }}
+                                                >
+                                                  {itemData.description}
+                                                </p>
+                                              )}
+                                            </div>
+                                          );
+                                        })}
+                                      </div>
+                                    </section>
+                                  )}
+                                </div>
+                              )}
                             </li>
                           ))}
                         </ul>
