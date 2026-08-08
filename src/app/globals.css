@@ -1870,6 +1870,70 @@ textarea:focus {
   fill: #191919;
 }
 
+.history-check-item {
+  padding: 12px 14px;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  background: #ffffff;
+  transition: background-color 160ms ease, border-color 160ms ease;
+}
+
+.history-check-item.is-completed {
+  border-color: #c7d2fe;
+  background: #f8faff;
+}
+
+.history-check-button {
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  flex: 0 0 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1.5px solid #94a3b8;
+  border-radius: 3px;
+  background: #ffffff;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 1;
+  cursor: pointer;
+  transition: background-color 160ms ease, border-color 160ms ease, transform 160ms ease;
+}
+
+.history-check-button:hover:not(:disabled) {
+  border-color: #4f46e5;
+  transform: scale(1.06);
+}
+
+.history-check-button[aria-pressed="true"] {
+  border-color: #4f46e5;
+  background: #4f46e5;
+}
+
+.history-check-button:focus-visible {
+  outline: 3px solid rgba(79, 70, 229, 0.25);
+  outline-offset: 2px;
+}
+
+.history-check-button:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}
+
+.history-check-title {
+  color: #1e293b;
+  font-size: 14px;
+  transition: color 160ms ease;
+}
+
+.history-check-item.is-completed .history-check-title {
+  color: #94a3b8;
+  text-decoration: line-through;
+  text-decoration-thickness: 1.5px;
+}
+
 /* Keep every visual action consistent with the pill-shaped button language. */
 button:not(.nav-text-button):not(.guide-link),
 .primary-btn,

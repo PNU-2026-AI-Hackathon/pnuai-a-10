@@ -19,6 +19,14 @@ type HistoryItem = {
   createdAt: string;
 };
 
+type HistoryChecklistItem = {
+  id?: string;
+  priority?: string;
+  title?: string;
+  description?: string;
+  isCompleted?: boolean;
+};
+
 export default function MyPage() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
@@ -28,6 +36,7 @@ export default function MyPage() {
   const [expandedHistoryId, setExpandedHistoryId] = useState<string | null>(
     null
   );
+  const [updatingChecklistKey, setUpdatingChecklistKey] = useState<string | null>(null);
 
   useEffect(() => {
     const supabase = createBrowserSupabaseClient();
@@ -75,6 +84,71 @@ export default function MyPage() {
     const supabase = createBrowserSupabaseClient();
     await supabase.auth.signOut();
     setUser(null);
+  };
+
+  const toggleChecklistItem = async (
+    historyId: string,
+    checklistIndex: number,
+    isCompleted: boolean
+  ) => {
+    const updateKey = `${historyId}-${checklistIndex}`;
+    const previousHistory = history;
+
+    const nextHistory = history.map((historyItem) => {
+      if (historyItem.id !== historyId || !Array.isArray(historyItem.checklist)) {
+        return historyItem;
+      }
+
+      const checklist = historyItem.checklist.map((checkItem, index) =>
+        index === checklistIndex && typeof checkItem === "object" && checkItem !== null
+          ? { ...checkItem, isCompleted }
+          : checkItem
+      );
+      const validItems = checklist.filter(
+        (checkItem): checkItem is HistoryChecklistItem =>
+          typeof checkItem === "object" && checkItem !== null && "title" in checkItem
+      );
+      const completedCount = validItems.filter((checkItem) => checkItem.isCompleted).length;
+
+      return {
+        ...historyItem,
+        checklist,
+        checklistProgress:
+          validItems.length > 0
+            ? Math.round((completedCount / validItems.length) * 100)
+            : 0,
+      };
+    });
+
+    setHistory(nextHistory);
+    setUpdatingChecklistKey(updateKey);
+    setHistoryError("");
+
+    try {
+      const response = await fetch("/api/history", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ historyId, checklistIndex, isCompleted }),
+      });
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || data.error || "체크 상태를 저장하지 못했습니다.");
+      }
+
+      setHistory((currentHistory) =>
+        currentHistory.map((historyItem) =>
+          historyItem.id === historyId ? data.history : historyItem
+        )
+      );
+    } catch (error) {
+      setHistory(previousHistory);
+      setHistoryError(
+        error instanceof Error ? error.message : "체크 상태를 저장하지 못했습니다."
+      );
+    } finally {
+      setUpdatingChecklistKey(null);
+    }
   };
 
   const loginProvider =
@@ -502,23 +576,16 @@ export default function MyPage() {
                                             return null;
                                           }
 
-                                          const itemData = checkItem as {
-                                            id?: string;
-                                            priority?: string;
-                                            title?: string;
-                                            description?: string;
-                                            isCompleted?: boolean;
-                                          };
+                                          const itemData = checkItem as HistoryChecklistItem;
+                                          const checklistKey = `${item.id}-${index}`;
+                                          const isUpdating = updatingChecklistKey === checklistKey;
 
                                           return (
                                             <div
                                               key={itemData.id ?? `${item.id}-check-${index}`}
-                                              style={{
-                                                padding: "12px 14px",
-                                                borderRadius: "12px",
-                                                background: "#ffffff",
-                                                border: "1px solid #e2e8f0",
-                                              }}
+                                              className={`history-check-item${
+                                                itemData.isCompleted ? " is-completed" : ""
+                                              }`}
                                             >
                                               <div
                                                 style={{
@@ -528,32 +595,27 @@ export default function MyPage() {
                                                   marginBottom: itemData.description ? "6px" : 0,
                                                 }}
                                               >
-                                                <span
-                                                  aria-hidden="true"
-                                                  style={{
-                                                    width: "18px",
-                                                    height: "18px",
-                                                    borderRadius: "50%",
-                                                    border: itemData.isCompleted
-                                                      ? "1px solid #4f46e5"
-                                                      : "1px solid #94a3b8",
-                                                    background: itemData.isCompleted ? "#4f46e5" : "#ffffff",
-                                                    color: "#ffffff",
-                                                    display: "inline-flex",
-                                                    alignItems: "center",
-                                                    justifyContent: "center",
-                                                    fontSize: "12px",
-                                                    flexShrink: 0,
-                                                  }}
+                                                <button
+                                                  type="button"
+                                                  className="history-check-button"
+                                                  aria-label={`${itemData.title ?? "체크리스트 항목"} ${
+                                                    itemData.isCompleted ? "완료 취소" : "완료"
+                                                  }`}
+                                                  aria-pressed={Boolean(itemData.isCompleted)}
+                                                  disabled={isUpdating}
+                                                  onClick={() =>
+                                                    toggleChecklistItem(
+                                                      item.id,
+                                                      index,
+                                                      !itemData.isCompleted
+                                                    )
+                                                  }
                                                 >
                                                   {itemData.isCompleted ? "✓" : ""}
-                                                </span>
+                                                </button>
 
                                                 <strong
-                                                  style={{
-                                                    color: "#1e293b",
-                                                    fontSize: "14px",
-                                                  }}
+                                                  className="history-check-title"
                                                 >
                                                   {itemData.title}
                                                 </strong>

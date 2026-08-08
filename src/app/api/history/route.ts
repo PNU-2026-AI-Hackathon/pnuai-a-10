@@ -163,3 +163,74 @@ export async function POST(request: Request) {
     { status: 201 }
   );
 }
+
+export async function PATCH(request: Request) {
+  const supabase = await createServerSupabaseClient();
+  const {
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser();
+
+  if (userError || !user) {
+    return NextResponse.json({ error: "로그인이 필요합니다." }, { status: 401 });
+  }
+
+  const body = await request.json();
+  const historyId = typeof body.historyId === "string" ? body.historyId : "";
+  const checklistIndex = body.checklistIndex;
+  const isCompleted = body.isCompleted;
+
+  if (
+    !historyId ||
+    !Number.isInteger(checklistIndex) ||
+    checklistIndex < 0 ||
+    typeof isCompleted !== "boolean"
+  ) {
+    return NextResponse.json({ error: "올바르지 않은 체크리스트 요청입니다." }, { status: 400 });
+  }
+
+  const { data: existing, error: selectError } = await supabase
+    .from("history")
+    .select("checklist")
+    .eq("id", historyId)
+    .eq("user_id", user.id)
+    .single();
+
+  if (selectError || !existing) {
+    return NextResponse.json({ error: "분석 이력을 찾을 수 없습니다." }, { status: 404 });
+  }
+
+  const checklist = Array.isArray(existing.checklist)
+    ? (existing.checklist as ChecklistItem[]).map((item) => ({ ...item }))
+    : [];
+
+  if (!checklist[checklistIndex]) {
+    return NextResponse.json({ error: "체크리스트 항목을 찾을 수 없습니다." }, { status: 404 });
+  }
+
+  checklist[checklistIndex].isCompleted = isCompleted;
+  const completedCount = checklist.filter((item) => item.isCompleted).length;
+  const checklistProgress = checklist.length
+    ? Math.round((completedCount / checklist.length) * 100)
+    : 0;
+
+  const { data, error } = await supabase
+    .from("history")
+    .update({ checklist, checklist_progress: checklistProgress })
+    .eq("id", historyId)
+    .eq("user_id", user.id)
+    .select(
+      "id, user_id, type, title, company, risk_level, leaked_items, risk_types, checklist, checklist_progress, result_summary, created_at"
+    )
+    .single();
+
+  if (error || !data) {
+    console.error("Failed to update checklist:", error);
+    return NextResponse.json(
+      { error: "체크 상태를 저장하지 못했습니다." },
+      { status: 500 }
+    );
+  }
+
+  return NextResponse.json({ history: toHistoryItem(data as HistoryRow) });
+}
