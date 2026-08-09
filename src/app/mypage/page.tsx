@@ -396,6 +396,7 @@ export default function MyPage() {
                                 </span>
                               </span>
 
+                              {Array.isArray(item.checklist) && item.checklist.length > 0 && (
                               <span
                                 style={{
                                   minWidth: "90px",
@@ -418,6 +419,7 @@ export default function MyPage() {
                                   진행률
                                 </small>
                               </span>
+                              )}
                               </div>
                               <button
                                 type="button"
