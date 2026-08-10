@@ -36,6 +36,7 @@ export default function MyPage() {
   const [history, setHistory] = useState<HistoryItem[]>([]);
   const [historyLoading, setHistoryLoading] = useState(false);
   const [historyError, setHistoryError] = useState("");
+  const [historyPage, setHistoryPage] = useState(1);
   const [expandedHistoryId, setExpandedHistoryId] = useState<string | null>(
     null
   );
@@ -173,12 +174,19 @@ export default function MyPage() {
     user?.user_metadata.email ??
     "";
 
+  const historyItemsPerPage = 5;
+  const historyPageCount = Math.ceil(history.length / historyItemsPerPage);
+  const visibleHistory = history.slice(
+    (historyPage - 1) * historyItemsPerPage,
+    historyPage * historyItemsPerPage
+  );
+
   if (loading) {
     return (
       <main className="analysis-page">
         <Navigation activePage="mypage" />
 
-        <section className="workspace single-workspace">
+        <section className="workspace single-workspace mypage-workspace">
           <div className="panel">
             <p>로그인 상태를 확인하는 중입니다.</p>
           </div>
@@ -191,7 +199,7 @@ export default function MyPage() {
     <main className="analysis-page">
       <Navigation activePage="mypage" />
 
-      <section className="workspace single-workspace">
+      <section className="workspace single-workspace mypage-workspace">
         <div className="section-heading">
           <div>
             <h2>마이페이지</h2>
@@ -301,8 +309,9 @@ export default function MyPage() {
                     {!historyLoading &&
                       !historyError &&
                       history.length > 0 && (
+                        <>
                         <ul className="check-list">
-                          {history.map((item) => (
+                          {visibleHistory.map((item) => (
                             <li
                               key={item.id}
                               style={{
@@ -322,7 +331,6 @@ export default function MyPage() {
                                 display: "flex",
                                 alignItems: "center",
                                 gap: "20px",
-                              
                               }}
                               >
                               <span
@@ -361,63 +369,67 @@ export default function MyPage() {
                                   위험도 {item.riskLevel}
                                 </span>
 
+                              </span>
+
+                              {Array.isArray(item.checklist) && item.checklist.length > 0 && (
+                                <span
+                                  style={{
+                                    minWidth: "90px",
+                                    alignSelf: "flex-start",
+                                    textAlign: "center",
+                                    fontWeight: 800,
+                                    fontSize: "28px",
+                                    lineHeight: 1.1,
+                                    color: "#4f46e5",
+                                  }}
+                                >
+                                  {item.checklistProgress ?? 0}%
+                                  <br />
+                                  <small
+                                    style={{
+                                      fontSize: "12px",
+                                      color: "#64748b",
+                                      fontWeight: 600,
+                                    }}
+                                  >
+                                    진행률
+                                  </small>
+                                </span>
+                              )}
+                              </div>
+                              <div
+                                style={{
+                                  display: "flex",
+                                  alignItems: "flex-end",
+                                  justifyContent: "space-between",
+                                  gap: "16px",
+                                }}
+                              >
                                 <span
                                   style={{
                                     whiteSpace: "nowrap",
                                     fontSize: "14px",
                                     color: "#64748b",
-                                    transform: "translateY(6px)",
                                   }}
                                 >
                                   {item.createdAt
-                                    ? new Date(
-                                        item.createdAt
-                                      ).toLocaleString("ko-KR")
+                                    ? new Date(item.createdAt).toLocaleString("ko-KR")
                                     : "날짜 없음"}
                                 </span>
-                              </span>
-
-                              {Array.isArray(item.checklist) && item.checklist.length > 0 && (
-                              <span
-                                style={{
-                                  minWidth: "90px",
-                                  textAlign: "center",
-                                  fontWeight: 800,
-                                  fontSize: "24px",
-                                  color: "#4f46e5",
-                                }}
-                              >
-                                {item.checklistProgress ?? 0}%
-                                <br />
-
-                                <small
-                                  style={{
-                                    fontSize: "12px",
-                                    color: "#64748b",
-                                    fontWeight: 600,
-                                  }}
+                                <button
+                                  type="button"
+                                  className="small-btn"
+                                  onClick={() =>
+                                    setExpandedHistoryId((currentId) =>
+                                      currentId === item.id ? null : item.id
+                                    )
+                                  }
+                                  aria-expanded={expandedHistoryId === item.id}
+                                  aria-controls={`history-detail-${item.id}`}
                                 >
-                                  진행률
-                                </small>
-                              </span>
-                              )}
+                                  {expandedHistoryId === item.id ? "상세 닫기" : "상세 보기"}
+                                </button>
                               </div>
-                              <button
-                                type="button"
-                                className="small-btn"
-                                onClick={() =>
-                                  setExpandedHistoryId((currentId) =>
-                                    currentId === item.id ? null : item.id
-                                  )
-                                }
-                                aria-expanded={expandedHistoryId === item.id}
-                                aria-controls={`history-detail-${item.id}`}
-                                style={{
-                                  alignSelf: "flex-end",
-                                }}
-                              >
-                                {expandedHistoryId === item.id ? "상세 닫기" : "상세 보기"}
-                              </button>
                               {expandedHistoryId === item.id && (
                                 <div
                                   id={`history-detail-${item.id}`}
@@ -603,17 +615,6 @@ export default function MyPage() {
                                                   {itemData.title}
                                                 </strong>
 
-                                                {itemData.priority && (
-                                                  <span
-                                                    style={{
-                                                      marginLeft: "auto",
-                                                      fontSize: "12px",
-                                                      color: "#64748b",
-                                                    }}
-                                                  >
-                                                    {itemData.priority}
-                                                  </span>
-                                                )}
                                               </div>
 
                                               {itemData.description && (
@@ -622,8 +623,8 @@ export default function MyPage() {
                                                     margin: 0,
                                                     paddingLeft: "26px",
                                                     color: "#64748b",
-                                                    fontSize: "13px",
-                                                    lineHeight: 1.5,
+                                                    fontSize: "14px",
+                                                    lineHeight: 1.6,
                                                     wordBreak: "break-word",
                                                   }}
                                                 >
@@ -641,6 +642,44 @@ export default function MyPage() {
                             </li>
                           ))}
                         </ul>
+                        {historyPageCount > 1 && (
+                          <div
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              gap: "12px",
+                              marginTop: "18px",
+                            }}
+                          >
+                            <button
+                              type="button"
+                              className="small-btn"
+                              disabled={historyPage === 1}
+                              onClick={() => {
+                                setExpandedHistoryId(null);
+                                setHistoryPage((page) => Math.max(1, page - 1));
+                              }}
+                            >
+                              이전
+                            </button>
+                            <span style={{ color: "#64748b", fontSize: "14px" }}>
+                              {historyPage} / {historyPageCount}
+                            </span>
+                            <button
+                              type="button"
+                              className="small-btn"
+                              disabled={historyPage === historyPageCount}
+                              onClick={() => {
+                                setExpandedHistoryId(null);
+                                setHistoryPage((page) => Math.min(historyPageCount, page + 1));
+                              }}
+                            >
+                              다음
+                            </button>
+                          </div>
+                        )}
+                        </>
                       )}
                   </article>
 

@@ -1186,6 +1186,33 @@ textarea:focus {
   padding-top: 48px;
 }
 
+.mypage-workspace {
+  width: 100%;
+  max-width: 1160px;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+
+.mypage-workspace .app-shell {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.mypage-workspace .mypage-info-header h3 {
+  font-size: 26px;
+}
+
+.mypage-workspace .info-card h4 {
+  font-size: 18px;
+}
+
+.mypage-workspace .history-check-title {
+  font-size: 16px;
+}
+
+.mypage-workspace .check-list > li::after {
+  content: none;
+}
+
 @media (max-width: 760px) {
   .landing-nav {
     padding: 20px 22px;
