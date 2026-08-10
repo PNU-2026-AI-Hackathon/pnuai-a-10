@@ -14,6 +14,7 @@ import type {
   LeakAnalysisResult,
 } from "../../types/analysis";
 import ReportSummaryPanel from "./components/ReportSummaryPanel";
+import Navigation from "../../components/Navigation";
 
 const sampleText = `개인정보 유출 안내
 
@@ -839,21 +840,7 @@ export default function LeakPage() {
 
   return (
     <main className="analysis-page">
-      <header className="nav">
-        <a href="/banner" className="brand">
-          <span className="brand-badge">L</span>
-          <span>LeakCare</span>
-        </a>
-
-        <nav className="nav-menu" aria-label="주요 메뉴">
-          <a href="/banner#guide">이용 안내</a>
-          <a href="/leak" aria-current="page">
-          유출 안내문 분석</a>
-          <a href="/sms">의심 문자 분석</a>
-          <a href="/login">로그인</a>
-          <a href="/mypage">마이페이지</a>
-        </nav>
-      </header>
+      <Navigation activePage="leak" />
 
       <section className="workspace single-workspace">
         <div className="section-heading">

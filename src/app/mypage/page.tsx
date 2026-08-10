@@ -1,8 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import type { User } from "@supabase/supabase-js";
 import { createBrowserSupabaseClient } from "../../lib/supabase/client";
+import Navigation from "../../components/Navigation";
 
 type HistoryItem = {
   id: string;
@@ -28,6 +30,7 @@ type HistoryChecklistItem = {
 };
 
 export default function MyPage() {
+  const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [history, setHistory] = useState<HistoryItem[]>([]);
@@ -82,8 +85,16 @@ export default function MyPage() {
 
   const signOut = async () => {
     const supabase = createBrowserSupabaseClient();
-    await supabase.auth.signOut();
+    const { error } = await supabase.auth.signOut();
+
+    if (error) {
+      alert("로그아웃에 실패했습니다. 잠시 후 다시 시도해주세요.");
+      return;
+    }
+
     setUser(null);
+    router.push("/banner");
+    router.refresh();
   };
 
   const toggleChecklistItem = async (
@@ -165,22 +176,7 @@ export default function MyPage() {
   if (loading) {
     return (
       <main className="analysis-page">
-        <header className="nav">
-          <a href="/banner" className="brand">
-            <span className="brand-badge">L</span>
-            <span>LeakCare</span>
-          </a>
-
-          <nav className="nav-menu" aria-label="주요 메뉴">
-            <a href="/banner#guide">이용 안내</a>
-            <a href="/leak">유출 안내문 분석</a>
-            <a href="/sms">의심 문자 분석</a>
-            <a href="/login">로그인</a>
-            <a href="/mypage" aria-current="page">
-              마이페이지
-            </a>
-          </nav>
-        </header>
+        <Navigation activePage="mypage" />
 
         <section className="workspace single-workspace">
           <div className="panel">
@@ -193,22 +189,7 @@ export default function MyPage() {
 
   return (
     <main className="analysis-page">
-      <header className="nav">
-        <a href="/banner" className="brand">
-          <span className="brand-badge">L</span>
-          <span>LeakCare</span>
-        </a>
-
-        <nav className="nav-menu" aria-label="주요 메뉴">
-          <a href="/banner#guide">이용 안내</a>
-          <a href="/leak">유출 안내문 분석</a>
-          <a href="/sms">의심 문자 분석</a>
-          <a href="/login">로그인</a>
-          <a href="/mypage" aria-current="page">
-            마이페이지
-          </a>
-        </nav>
-      </header>
+      <Navigation activePage="mypage" />
 
       <section className="workspace single-workspace">
         <div className="section-heading">

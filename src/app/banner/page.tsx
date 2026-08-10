@@ -1,38 +1,11 @@
 "use client";
 
-export default function BannerPage() {
-  const scrollToGuide = () => {
-    document.getElementById("guide")?.scrollIntoView({
-      behavior: "smooth",
-      block: "start",
-    });
-  };
+import Navigation from "../../components/Navigation";
 
+export default function BannerPage() {
   return (
     <div className="page">
-      <header className="nav">
-        <a href="/banner" className="brand">
-          <span className="brand-badge">L</span>
-          <span>LeakCare</span>
-        </a>
-
-        <nav className="nav-menu">
-          <button className="nav-text-button" onClick={scrollToGuide}>
-            이용 안내
-          </button>
-
-          <a href="/leak" target="_blank" rel="noopener noreferrer">
-            유출 안내문 분석
-          </a>
-
-          <a href="/sms" target="_blank" rel="noopener noreferrer">
-            의심 문자 분석
-          </a>
-          <a href="/login" className="secondary=btn">
-            로그인</a>
-          <a href="/mypage">마이페이지</a>
-        </nav>
-      </header>
+      <Navigation guideButton />
 
       <main>
         <section className="hero">
