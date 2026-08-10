@@ -11,16 +11,30 @@ export default function ReminderBanner() {
 
   useEffect(() => {
     const supabase = createBrowserSupabaseClient();
+    let isMounted = true;
 
     const checkSession = async () => {
       const {
         data: { session },
       } = await supabase.auth.getSession();
 
-      setIsLoggedIn(Boolean(session));
+      if (isMounted) {
+        setIsLoggedIn(Boolean(session));
+      }
     };
 
     checkSession();
+
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setIsLoggedIn(Boolean(session));
+    });
+
+    return () => {
+      isMounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   if (!isLoggedIn || isDismissed || !hasIncompleteChecklist) {
