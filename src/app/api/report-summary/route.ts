@@ -185,7 +185,7 @@ export async function POST(
 ) {
   try {
     const body: unknown =
-      await request.json();
+      await request.json().catch(() => null);
 
     if (!isRecord(body)) {
       return NextResponse.json(

@@ -68,7 +68,6 @@ export default function SmsPage() {
 
     try {
       const extractedText = await extractTextFromImage(file);
-      console.log("이미지에서 추출된 문자:", extractedText);
       setText(extractedText);
       setShowResult(false);
       setResult(null);

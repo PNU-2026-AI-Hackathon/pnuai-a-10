@@ -828,7 +828,6 @@ export default function LeakPage() {
 
     try {
       const extractedText = await extractTextFromImage(file);
-      console.log("이미지에서 추출된 텍스트:", extractedText);
       setText(extractedText);
     } catch (error) {
       console.error("OCR 처리 실패:", error);
