@@ -6,12 +6,39 @@ import { createBrowserSupabaseClient } from "../lib/supabase/client";
 export default function ReminderBanner() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isDismissed, setIsDismissed] = useState(false);
-
-  const hasIncompleteChecklist = true;
+  const [hasIncompleteChecklist, setHasIncompleteChecklist] = useState(false);
 
   useEffect(() => {
     const supabase = createBrowserSupabaseClient();
     let isMounted = true;
+
+    const checkIncompleteChecklist = async () => {
+      try {
+        const response = await fetch("/api/history", { cache: "no-store" });
+
+        if (!response.ok) {
+          setHasIncompleteChecklist(false);
+          return;
+        }
+
+        const data = await response.json();
+        const history = Array.isArray(data.history) ? data.history : [];
+        const hasIncomplete = history.some(
+          (item) =>
+            Array.isArray(item.checklist) &&
+            item.checklist.length > 0 &&
+            item.checklist.some((checkItem: { isCompleted?: boolean }) => !checkItem.isCompleted)
+        );
+
+        if (isMounted) {
+          setHasIncompleteChecklist(hasIncomplete);
+        }
+      } catch {
+        if (isMounted) {
+          setHasIncompleteChecklist(false);
+        }
+      }
+    };
 
     const checkSession = async () => {
       const {
@@ -19,7 +46,14 @@ export default function ReminderBanner() {
       } = await supabase.auth.getSession();
 
       if (isMounted) {
-        setIsLoggedIn(Boolean(session));
+        const loggedIn = Boolean(session);
+        setIsLoggedIn(loggedIn);
+
+        if (loggedIn) {
+          await checkIncompleteChecklist();
+        } else {
+          setHasIncompleteChecklist(false);
+        }
       }
     };
 
@@ -28,12 +62,26 @@ export default function ReminderBanner() {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
-      setIsLoggedIn(Boolean(session));
+      const loggedIn = Boolean(session);
+      setIsLoggedIn(loggedIn);
+
+      if (loggedIn) {
+        void checkIncompleteChecklist();
+      } else {
+        setHasIncompleteChecklist(false);
+      }
     });
+
+    const handleChecklistUpdate = () => {
+      void checkIncompleteChecklist();
+    };
+
+    window.addEventListener("checklist-progress-updated", handleChecklistUpdate);
 
     return () => {
       isMounted = false;
       subscription.unsubscribe();
+      window.removeEventListener("checklist-progress-updated", handleChecklistUpdate);
     };
   }, []);
 

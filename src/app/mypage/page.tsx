@@ -153,6 +153,7 @@ export default function MyPage() {
           historyItem.id === historyId ? data.history : historyItem
         )
       );
+      window.dispatchEvent(new Event("checklist-progress-updated"));
     } catch (error) {
       setHistory(previousHistory);
       setHistoryError(
@@ -314,23 +315,27 @@ export default function MyPage() {
                           {visibleHistory.map((item) => (
                             <li
                               key={item.id}
+                              className="history-card"
                               style={{
                                 background:
                                   "linear-gradient(135deg, #EEF2FF 0%, #EDE9FE 100%)",
                                 border: "1px solid #ddd6fe",
-                                padding: "18px 20px",
+                                width: "calc(100% - 48px)",
+                                margin: "0 auto",
+                                boxSizing: "border-box",
+                                padding: "14px 18px",
                                 minHeight: "auto",
                                 display: "flex",
                                 flexDirection: "column",
                                 alignItems: "stretch",
-                                gap: "16px",
+                                gap: "12px",
                               }}
                             >
                               <div
                               style={{
                                 display: "flex",
                                 alignItems: "center",
-                                gap: "20px",
+                                gap: "16px",
                               }}
                               >
                               <span
@@ -349,8 +354,8 @@ export default function MyPage() {
                                     whiteSpace: "nowrap",
                                     fontSize: "18px",
                                     fontWeight: 800,
-                                    marginBottom: "10px",
-                                    transform: "translateY(-4px)",
+                                    marginBottom: "6px",
+                                    transform: "translateY(-2px)",
                                   }}
                                 >
                                   {item.type === "leak"
@@ -363,7 +368,7 @@ export default function MyPage() {
                                     whiteSpace: "nowrap",
                                     fontSize: "14px",
                                     color: "#334155",
-                                    transform: "translateY(4px)",
+                                    transform: "translateY(2px)",
                                   }}
                                 >
                                   위험도 {item.riskLevel}
@@ -375,6 +380,7 @@ export default function MyPage() {
                                 <span
                                   style={{
                                     minWidth: "90px",
+                                    paddingRight: 0,
                                     alignSelf: "flex-start",
                                     textAlign: "center",
                                     fontWeight: 800,
@@ -402,7 +408,7 @@ export default function MyPage() {
                                   display: "flex",
                                   alignItems: "flex-end",
                                   justifyContent: "space-between",
-                                  gap: "16px",
+                                  gap: "12px",
                                 }}
                               >
                                 <span
