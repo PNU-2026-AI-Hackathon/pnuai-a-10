@@ -80,6 +80,15 @@ export const RISK_CRITERIA = {
     sourceIds: [3, 6, 7],
   },
 
+  통신가입자식별정보: {
+    weight: 10,
+    category: "통신 가입자 식별정보",
+    riskReason:
+      "통신 가입자를 식별하는 정보는 통신사 사칭이나 본인확인 사칭에 활용될 수 있습니다.",
+    possibleDamages: ["통신사 사칭", "본인인증 사칭", "명의도용 주의"],
+    sourceIds: [1, 3, 4],
+  },
+
   결제내역: {
     weight: 10,
     category: "구매·결제 관련 정보",
@@ -114,6 +123,15 @@ export const RISK_CRITERIA = {
       "비밀번호는 계정 접근에 직접 사용되는 인증정보이므로 단독 유출만으로도 계정 탈취 위험이 있습니다.",
     possibleDamages: ["계정 탈취", "다른 서비스 계정 침해", "결제수단 악용"],
     sourceIds: [3, 5, 6, 7],
+  },
+
+  통신인증정보: {
+    weight: 30,
+    category: "통신 인증정보",
+    riskReason:
+      "유심 인증키와 같은 통신 인증정보는 회선 보호와 본인인증 안전에 직접 관련된 민감한 인증정보입니다.",
+    possibleDamages: ["통신사 사칭", "본인인증 악용", "명의도용 주의"],
+    sourceIds: [1, 3, 5],
   },
 
   주민등록번호: {
@@ -152,10 +170,22 @@ const RISK_ITEM_ALIASES: Record<string, RiskItemKey> = {
   전화번호: "전화번호",
   휴대전화번호: "전화번호",
   휴대폰번호: "전화번호",
+  가입자전화번호: "전화번호",
 
   계정정보: "계정정보",
   계정ID: "계정정보",
   로그인정보: "계정정보",
+
+  통신가입자식별정보: "통신가입자식별정보",
+  IMSI: "통신가입자식별정보",
+  가입자식별번호: "통신가입자식별정보",
+  "가입자식별번호(IMSI)": "통신가입자식별정보",
+  국제이동가입자식별번호: "통신가입자식별정보",
+
+  통신인증정보: "통신인증정보",
+  유심인증키: "통신인증정보",
+  USIM인증키: "통신인증정보",
+  SIM인증키: "통신인증정보",
 
   결제내역: "결제내역",
   결제정보: "결제내역",
@@ -335,9 +365,19 @@ const MAX_SCORE = 100;
 const HIGH_THRESHOLD = 40;
 const MEDIUM_THRESHOLD = 20;
 
-function normalizeRiskItem(item: string): RiskItemKey | null {
+export function normalizeRiskItem(item: string): RiskItemKey | null {
   const normalized = item.replace(/\s/g, "").trim();
-  return RISK_ITEM_ALIASES[normalized] ?? null;
+  const alias = RISK_ITEM_ALIASES[normalized];
+
+  if (alias) {
+    return alias;
+  }
+
+  if (normalized.startsWith("가입자식별번호(")) {
+    return "통신가입자식별정보";
+  }
+
+  return null;
 }
 
 function includesAllItems(

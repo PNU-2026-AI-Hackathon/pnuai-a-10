@@ -96,6 +96,40 @@ export const actionRules: Record<string, ChecklistItem[]> = {
     },
   ],
 
+  통신가입자식별정보: [
+    {
+      id: "telecom-line-usim-check",
+      priority: "즉시 조치",
+      title: "통신사 공식 채널에서 회선과 유심 상태를 확인하세요.",
+      description:
+        "통신 가입자 식별정보가 유출된 경우 공식 앱, 홈페이지, 고객센터를 통해 본인 회선과 유심 관련 이상 여부를 확인하세요.",
+    },
+    {
+      id: "telecom-identity-warning",
+      priority: "1주 이내 확인",
+      title: "본인 명의의 의심스러운 개통 여부를 주의하세요.",
+      description:
+        "통신 가입자 식별정보는 통신사 사칭이나 명의도용 시도에 악용될 수 있으므로 낯선 개통 안내나 본인확인 요청을 주의해야 합니다.",
+    },
+  ],
+
+  통신인증정보: [
+    {
+      id: "telecom-auth-protection-check",
+      priority: "즉시 조치",
+      title: "통신사 공식 채널에서 유심 보호 조치를 확인하세요.",
+      description:
+        "유심 인증정보가 유출된 경우 공식 앱, 홈페이지, 고객센터를 통해 회선 보호를 위해 필요한 조치가 있는지 확인하세요.",
+    },
+    {
+      id: "telecom-auth-phishing-warning",
+      priority: "즉시 조치",
+      title: "본인인증이나 앱 설치를 요구하는 연락에 응하지 마세요.",
+      description:
+        "통신사를 사칭해 본인인증, 앱 설치, 개인정보 입력을 요구하는 문자나 전화를 받으면 공식 채널로 직접 확인하세요.",
+    },
+  ],
+
   비밀번호: [
     {
       id: "password-change-all",

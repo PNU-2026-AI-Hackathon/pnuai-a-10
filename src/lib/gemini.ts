@@ -57,6 +57,18 @@ function normalizeRiskLevel(value: unknown): RiskLevel {
 function normalizeLeakedItem(item: string): string {
   const normalized = item.replace(/\s/g, "");
 
+  if (normalized === "가입자식별번호") {
+    return item.trim();
+  }
+
+  if (normalized === "가입자식별번호(IMSI)") {
+    return item.trim();
+  }
+
+  if (normalized.startsWith("가입자식별번호(")) {
+    return "가입자 식별번호";
+  }
+
   const map: Record<string, string> = {
     휴대전화번호: "전화번호",
     휴대폰번호: "전화번호",
@@ -204,12 +216,17 @@ export async function extractKeyInfo(
   "company": "기업명 또는 알 수 없음",
   "service": "서비스명 또는 빈 문자열",
   "leakedItems": ["이름", "전화번호", "이메일", "주소", "주문내역", "계정정보", "비밀번호", "결제정보", "카드정보", "계좌번호", "생년월일", "주민등록번호"],
-  "riskTypes": ["스미싱", "피싱", "택배 사칭", "계정 탈취", "명의도용"],
+  "riskTypes": ["스미싱", "피싱", "택배 사칭", "계정 탈취", "명의도용", "통신사 사칭", "본인인증 사칭"],
   "riskLevel": "낮음" | "보통" | "높음",
   "reason": "위험도 판단 이유 한두 문장"
 }
 
 규칙:
+- leakedItems에 적힌 항목 목록은 예시이며 제한된 enum이 아니다.
+- 원문에 구체적으로 명시된 개인정보 항목은 가능한 한 원문의 표현을 유지해라.
+- 처음 보는 개인정보를 임의로 "계정정보", "결제정보" 같은 기존 대표 항목으로 일반화하지 마라.
+- 예: 가입자 식별번호(IMSI)는 "가입자 식별번호(IMSI)", 유심 인증키는 "유심 인증키", 가입자 전화번호는 "가입자 전화번호"로 유지해라.
+- 실제 원문에 단순히 "계정정보"라고만 적혀 있다면 "계정정보"를 사용할 수 있다.
 - 유출 항목은 입력문에 명시되거나 명확한 근거가 있을 때만 넣어라.
 - 입력문에 없는 개인정보를 유출 항목에 임의로 추가하지 마라.
 - 확실하지 않은 항목은 제외해라.

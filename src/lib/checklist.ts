@@ -1,5 +1,6 @@
 import type { ChecklistItem, ChecklistPriority } from "../types/analysis";
 import { actionRules } from "../data/actionRules";
+import { normalizeRiskItem } from "../data/riskCriteria";
 
 const priorityOrder: Record<ChecklistPriority, number> = {
   "즉시 조치": 1,
@@ -11,7 +12,10 @@ export function buildChecklist(leakedItems: string[]): ChecklistItem[] {
   const checklist: ChecklistItem[] = [];
 
   leakedItems.forEach((item) => {
-    const rules = actionRules[item];
+    const normalizedItem = normalizeRiskItem(item);
+    const rules =
+      actionRules[item] ??
+      (normalizedItem ? actionRules[normalizedItem] : undefined);
 
     if (rules) {
       checklist.push(...rules);
