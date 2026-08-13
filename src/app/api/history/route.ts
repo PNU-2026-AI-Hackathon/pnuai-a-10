@@ -5,6 +5,7 @@ import type {
   ChecklistItem,
   RiskLevel,
 } from "../../../types/analysis";
+import { calculateRiskLevel } from "../../../data/riskCriteria";
 
 type HistoryRow = {
   id: string;
@@ -29,6 +30,10 @@ function toHistoryItem(row: HistoryRow) {
     title: row.title,
     company: row.company ?? undefined,
     riskLevel: row.risk_level,
+    riskScore:
+      row.type === "leak"
+        ? calculateRiskLevel(row.leaked_items ?? []).score
+        : undefined,
     leakedItems: row.leaked_items,
     riskTypes: row.risk_types,
     checklist: row.checklist,

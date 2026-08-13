@@ -1,8 +1,59 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
 import Navigation from "../../components/Navigation";
 
+const featureSlides = [
+  {
+    id: "process",
+    title: "유출 분석 프로세스",
+    description: "통지문 입력부터 맞춤형 대응 체크리스트 생성까지",
+    image: "/images/banner/leak-process.png",
+    alt: "통지문 입력, 유출 항목 분석, 대응 체크리스트 생성으로 이어지는 유출 분석 프로세스",
+  },
+  {
+    id: "damage",
+    title: "2차 피해 위험 유형",
+    description: "스미싱·피싱·택배 사칭·계정 탈취 위험을 한눈에 확인",
+    image: "/images/banner/secondary-damage.png",
+    alt: "스미싱, 피싱, 택배 사칭, 계정 탈취 등 2차 피해 위험 유형",
+  },
+  {
+    id: "family",
+    title: "가족 공유용 안내문",
+    description: "어려운 유출 내용을 쉬운 말로 요약해 바로 공유",
+    image: "/images/banner/family-guide.png",
+    alt: "유출 내용을 분석하고 쉬운 설명으로 요약해 가족 공유용 안내문을 생성하는 과정",
+  },
+] as const;
+
 export default function BannerPage() {
+  const [activeFeature, setActiveFeature] = useState(0);
+  const [isFeatureVisible, setIsFeatureVisible] = useState(false);
+  const featureSectionRef = useRef<HTMLElement | null>(null);
+
+  useEffect(() => {
+    const section = featureSectionRef.current;
+
+    if (!section) {
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsFeatureVisible(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.18 }
+    );
+
+    observer.observe(section);
+
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <div className="page">
       <Navigation guideButton />
@@ -78,20 +129,50 @@ export default function BannerPage() {
           </div>
         </section>
 
-        <section className="stats" aria-label="서비스 핵심 지표">
-          <div className="stat-card">
-            <strong>3단계</strong>
-            <span>통지문 입력 → 유출 항목 추출 → 대응 체크리스트 생성</span>
+        <section
+          ref={featureSectionRef}
+          className={`feature-showcase${isFeatureVisible ? " is-visible" : ""}`}
+          aria-labelledby="feature-showcase-title"
+        >
+          <div className="feature-showcase-heading">
+            <h2 id="feature-showcase-title">유출 이후의 대응을 한눈에</h2>
+            <p>분석부터 2차 피해 예방, 가족 공유까지 LeakCare가 함께 정리합니다.</p>
           </div>
 
-          <div className="stat-card">
-            <strong>2차 피해</strong>
-            <span>스미싱, 피싱, 택배 사칭, 계정 탈취 위험을 함께 분석</span>
+          <div
+            className={`feature-image-frame feature-image-${featureSlides[activeFeature].id}`}
+          >
+            <img
+              src={featureSlides[activeFeature].image}
+              alt={featureSlides[activeFeature].alt}
+            />
           </div>
 
-          <div className="stat-card">
-            <strong>쉬운 설명</strong>
-            <span>가족에게 공유할 수 있는 짧고 쉬운 안내문 자동 생성</span>
+          <div className="feature-tabs" role="tablist" aria-label="LeakCare 주요 기능">
+            {featureSlides.map((feature, index) => (
+              <button
+                key={feature.id}
+                type="button"
+                role="tab"
+                id={`feature-tab-${feature.id}`}
+                aria-selected={activeFeature === index}
+                aria-controls="feature-showcase-panel"
+                className={`feature-tab${activeFeature === index ? " is-active" : ""}`}
+                onClick={() => setActiveFeature(index)}
+              >
+                <strong>{feature.title}</strong>
+                <span>{feature.description}</span>
+              </button>
+            ))}
+          </div>
+
+          <div
+            id="feature-showcase-panel"
+            role="tabpanel"
+            aria-labelledby={`feature-tab-${featureSlides[activeFeature].id}`}
+            className="sr-only"
+          >
+            {featureSlides[activeFeature].title}
           </div>
         </section>
 

@@ -13,6 +13,7 @@ type HistoryItem = {
   title: string;
   company?: string | null;
   riskLevel: string;
+  riskScore?: number;
   leakedItems?: string[] | null;
   riskTypes?: string[] | null;
   checklist?: unknown[] | null;
@@ -187,9 +188,18 @@ export default function MyPage() {
       <main className="analysis-page">
         <Navigation activePage="mypage" />
 
-        <section className="workspace single-workspace mypage-workspace">
-          <div className="panel">
-            <p>로그인 상태를 확인하는 중입니다.</p>
+        <section className="workspace single-workspace mypage-workspace mypage-loading-workspace">
+          <div className="mypage-loading-card" role="status" aria-live="polite">
+            <div className="mypage-loading-icon" aria-hidden="true">
+              <span></span>
+            </div>
+            <h2>마이페이지를 준비하고 있어요</h2>
+            <p>로그인 정보를 안전하게 확인하는 중입니다.</p>
+            <div className="mypage-loading-dots" aria-hidden="true">
+              <span></span>
+              <span></span>
+              <span></span>
+            </div>
           </div>
         </section>
       </main>
@@ -320,7 +330,7 @@ export default function MyPage() {
                                 background:
                                   "linear-gradient(135deg, #EEF2FF 0%, #EDE9FE 100%)",
                                 border: "1px solid #ddd6fe",
-                                width: "calc(100% - 48px)",
+                                width: "calc(100% - 16px)",
                                 margin: "0 auto",
                                 boxSizing: "border-box",
                                 padding: "14px 18px",
@@ -364,14 +374,18 @@ export default function MyPage() {
                                 </strong>
 
                                 <span
+                                  className="history-risk-level"
+                                  data-risk-level={item.riskLevel}
                                   style={{
                                     whiteSpace: "nowrap",
                                     fontSize: "14px",
-                                    color: "#334155",
                                     transform: "translateY(2px)",
                                   }}
                                 >
                                   위험도 {item.riskLevel}
+                                  {item.type === "leak" && item.riskScore !== undefined
+                                    ? ` (${item.riskScore}점)`
+                                    : ""}
                                 </span>
 
                               </span>

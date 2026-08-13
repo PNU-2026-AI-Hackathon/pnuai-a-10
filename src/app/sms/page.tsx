@@ -1,13 +1,33 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type CSSProperties } from "react";
 import Navigation from "../../components/Navigation";
 import { extractTextFromImage } from "../../lib/ocr";
 import type { SmsAnalysisResult } from "../../types/analysis";
+import { supportAgencyLinks } from "../../data/providerLinks";
+import { getRiskSources } from "../../data/riskSources";
 
 const sampleText = `[Web발신] 개인정보 유출 보상금 지급 대상자입니다.
 아래 링크에서 본인인증을 완료하면 보상금이 지급됩니다.
 http://leak-pay-support.example`;
+
+const resourcePanelStyle: CSSProperties = {
+  marginTop: "14px",
+  padding: "4px 18px",
+  border: "1px solid #ddd6fe",
+  borderRadius: "14px",
+  background: "linear-gradient(135deg, #EEF2FF 0%, #EDE9FE 100%)",
+};
+
+const officialSourcePanelStyle: CSSProperties = {
+  marginTop: "14px",
+  padding: "4px 18px",
+  border: "1px solid #e3e6eb",
+  borderRadius: "14px",
+  background: "#f5f6f8",
+};
+
+const smsOfficialSources = getRiskSources([1, 2, 3, 4]);
 
 export default function SmsPage() {
   const [text, setText] = useState("");
@@ -284,7 +304,10 @@ export default function SmsPage() {
                         <span className="icon-dot"></span> 우선 대응 체크리스트
                       </h4>
 
-                      <ul className="check-list">
+                      <ul
+                        className="check-list sms-check-list"
+                        data-risk-level={result.riskLevel}
+                      >
                         {result.recommendedActions.map((item, index) => (
                           <li key={`${item.id}-${index}`}>
                             <span className="num">{index + 1}</span>
@@ -297,6 +320,76 @@ export default function SmsPage() {
                           </li>
                         ))}
                       </ul>
+                    </article>
+
+                    <article className="info-card full">
+                      <h4>
+                        <span className="icon-dot"></span> 신고·상담 기관
+                      </h4>
+
+                      <div style={resourcePanelStyle}>
+                        {supportAgencyLinks.map((agency, index) => (
+                          <div
+                            key={agency.label}
+                            className="sms-resource-row"
+                            style={{
+                              borderBottom:
+                                index === supportAgencyLinks.length - 1
+                                  ? "none"
+                                  : "1px solid #dde1e7",
+                            }}
+                          >
+                            <div style={{ minWidth: 0 }}>
+                              <strong>{agency.label}</strong>
+                              <span>{agency.description}</span>
+                            </div>
+                            {agency.url && (
+                              <a
+                                href={agency.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                              >
+                                바로가기
+                              </a>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </article>
+
+                    <article className="info-card full">
+                      <h4>
+                        <span className="icon-dot"></span> 공식 참고 자료
+                      </h4>
+
+                      <div style={officialSourcePanelStyle}>
+                        {smsOfficialSources.map((source, index) => (
+                          <div
+                            key={source.sourceId}
+                            className="sms-resource-row"
+                            style={{
+                              borderBottom:
+                                index === smsOfficialSources.length - 1
+                                  ? "none"
+                                  : "1px solid #dde1e7",
+                            }}
+                          >
+                            <div style={{ minWidth: 0 }}>
+                              <strong>{source.organization}</strong>
+                              <span>{source.title}</span>
+                            </div>
+                            {source.url && (
+                              <a
+                                href={source.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                              >
+                                원문 보기
+                              </a>
+                            )}
+                          </div>
+                        ))}
+                      </div>
                     </article>
                   </div>
                 </>
