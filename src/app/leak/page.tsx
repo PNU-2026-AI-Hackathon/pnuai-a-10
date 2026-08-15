@@ -22,6 +22,9 @@ const sampleText = `개인정보 유출 안내
 결제 비밀번호 및 카드번호는 유출 대상에 포함되지 않았습니다.
 유출 사실을 악용한 택배 사칭 문자, 환불 안내 문자, 본인인증 요구에 주의해주시기 바랍니다.`;
 
+const leakCareShareUrl =
+  process.env.NEXT_PUBLIC_SITE_URL ?? "https://leakcare.vercel.app";
+
 type RiskGaugeProps = {
   riskLevel: "낮음" | "보통" | "높음";
   riskScore?: number;
@@ -817,8 +820,44 @@ export default function LeakPage() {
     }
   };
 
-  const showComingSoon = () => {
-    alert("추후 추가할 예정입니다.");
+  const shareLeakCare = async () => {
+    const familyGuideText = result?.familyMessage;
+
+    if (!familyGuideText) {
+      alert("공유할 안내문이 없습니다.");
+      return;
+    }
+
+    const shareData = {
+      title: "LeakCare",
+      text: familyGuideText,
+      url: leakCareShareUrl,
+    };
+
+    if (typeof navigator !== "undefined" && typeof navigator.share === "function") {
+      try {
+        await navigator.share(shareData);
+      } catch (error) {
+        if (error instanceof DOMException && error.name === "AbortError") {
+          return;
+        }
+
+        console.error("공유 실패:", error);
+        alert("공유하지 못했습니다.");
+      }
+
+      return;
+    }
+
+    try {
+      await navigator.clipboard.writeText(
+        `${familyGuideText}\n\n${leakCareShareUrl}`
+      );
+      alert("공유할 내용이 복사되었습니다.");
+    } catch (error) {
+      console.error("링크 복사 실패:", error);
+      alert("링크를 복사하지 못했습니다.");
+    }
   };
 
   const handleImageUpload = async (file: File | undefined) => {
@@ -1267,7 +1306,7 @@ export default function LeakPage() {
                         <button
                         type="button"
                         className="small-btn"
-                        onClick={showComingSoon}
+                        onClick={shareLeakCare}
                         >
                           공유하기
                         </button>
