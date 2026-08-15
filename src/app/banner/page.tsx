@@ -27,6 +27,8 @@ const featureSlides = [
   },
 ] as const;
 
+const FEATURE_SLIDE_DURATION = 6000;
+
 export default function BannerPage() {
   const [activeFeature, setActiveFeature] = useState(0);
   const [isFeatureVisible, setIsFeatureVisible] = useState(false);
@@ -53,6 +55,21 @@ export default function BannerPage() {
 
     return () => observer.disconnect();
   }, []);
+
+  useEffect(() => {
+    if (
+      !isFeatureVisible ||
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    ) {
+      return;
+    }
+
+    const timer = window.setTimeout(() => {
+      setActiveFeature((current) => (current + 1) % featureSlides.length);
+    }, FEATURE_SLIDE_DURATION);
+
+    return () => window.clearTimeout(timer);
+  }, [activeFeature, isFeatureVisible]);
 
   return (
     <div className="page">
