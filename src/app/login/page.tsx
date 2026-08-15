@@ -21,9 +21,8 @@ export default function LoginPage() {
   return (
     <main className="analysis-page">
       <header className="analysis-header">
-        <a href="/banner" className="brand">
-          <span className="brand-badge">L</span>
-          <span>LeakCare</span>
+        <a href="/banner" className="brand" aria-label="LeakCare 홈">
+          <img className="brand-logo" src="/images/leakcare-logo.png" alt="" />
         </a>
       </header>
 

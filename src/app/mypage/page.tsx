@@ -219,7 +219,7 @@ export default function MyPage() {
         </div>
 
         {!user ? (
-          <div className="panel">
+          <div className="panel mypage-login-panel">
             <div className="result-top">
               <div>
                 <h3>로그인이 필요합니다</h3>
@@ -228,8 +228,8 @@ export default function MyPage() {
             </div>
 
             <div className="action-buttons">
-              <a href="/login" className="small-btn">
-                로그인하러 가기
+              <a href="/login" className="small-btn mypage-login-btn">
+                로그인
               </a>
             </div>
           </div>

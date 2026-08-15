@@ -49,9 +49,8 @@ export default function Navigation({ activePage, guideButton = false }: Navigati
 
   return (
     <header className="nav">
-      <a href="/banner" className="brand">
-        <span className="brand-badge">L</span>
-        <span>LeakCare</span>
+      <a href="/banner" className="brand" aria-label="LeakCare 홈">
+        <img className="brand-logo" src="/images/leakcare-logo.png" alt="" />
       </a>
       <nav className="nav-menu" aria-label="주요 메뉴">
         {guideButton ? (
