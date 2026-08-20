@@ -287,16 +287,26 @@ export default function BannerPage() {
             >
               <div className="institution-marquee-track">
                 <div className="institution-logo-set">
-                  <img
-                    src="/images/banner/institution-logos.png"
-                    alt="사이버캅 NETAN, 개인정보보호위원회, 한국인터넷진흥원 KISA"
-                  />
+                  <div className="institution-logo-row">
+                    <img className="institution-netan-logo" src="/images/banner/netan-transparent.png" alt="사이버캅 NETAN" />
+                    <div className="institution-source-crop institution-pipc-logo" role="img" aria-label="개인정보보호위원회">
+                      <img src="/images/banner/institution-logos.png" alt="" />
+                    </div>
+                    <div className="institution-source-crop institution-kisa-logo" role="img" aria-label="한국인터넷진흥원 KISA">
+                      <img src="/images/banner/institution-logos.png" alt="" />
+                    </div>
+                  </div>
                 </div>
                 <div className="institution-logo-set" aria-hidden="true">
-                  <img
-                    src="/images/banner/institution-logos.png"
-                    alt=""
-                  />
+                  <div className="institution-logo-row">
+                    <img className="institution-netan-logo" src="/images/banner/netan-transparent.png" alt="" />
+                    <div className="institution-source-crop institution-pipc-logo">
+                      <img src="/images/banner/institution-logos.png" alt="" />
+                    </div>
+                    <div className="institution-source-crop institution-kisa-logo">
+                      <img src="/images/banner/institution-logos.png" alt="" />
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -305,8 +315,8 @@ export default function BannerPage() {
               <div className="banner-footer-brand">
                 <strong>Leakcare</strong>
                 <p>
-                  (주) 창의융합 AI해커톤&nbsp; | &nbsp;코드덤센터&nbsp; | &nbsp;팀장
-                  이수빈&nbsp; | &nbsp;Tel - 010 2222 2222
+                  (주) 창의융합 AI해커톤&nbsp; | &nbsp;코드타설단&nbsp; | &nbsp;팀장
+                  이수빈&nbsp; | &nbsp;Email: subin0515@pusan.ac.kr
                 </p>
                 <div className="banner-footer-social" aria-label="소셜 미디어">
                   <span aria-label="Instagram">◎</span>

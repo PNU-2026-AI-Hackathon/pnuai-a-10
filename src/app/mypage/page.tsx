@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import type { User } from "@supabase/supabase-js";
 import { createBrowserSupabaseClient } from "../../lib/supabase/client";
 import Navigation from "../../components/Navigation";
+import LogoutConfirmModal from "../../components/LogoutConfirmModal";
 
 type HistoryItem = {
   id: string;
@@ -38,6 +39,8 @@ export default function MyPage() {
   const [historyLoading, setHistoryLoading] = useState(false);
   const [historyError, setHistoryError] = useState("");
   const [historyPage, setHistoryPage] = useState(1);
+  const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
+  const [isSigningOut, setIsSigningOut] = useState(false);
   const [expandedHistoryId, setExpandedHistoryId] = useState<string | null>(
     null
   );
@@ -86,10 +89,13 @@ export default function MyPage() {
   }, []);
 
   const signOut = async () => {
+    setIsSigningOut(true);
+
     const supabase = createBrowserSupabaseClient();
     const { error } = await supabase.auth.signOut();
 
     if (error) {
+      setIsSigningOut(false);
       alert("로그아웃에 실패했습니다. 잠시 후 다시 시도해주세요.");
       return;
     }
@@ -708,7 +714,7 @@ export default function MyPage() {
                       <span className="icon-dot"></span> 계정 관리
                     </h4>
 
-                    <button className="small-btn" onClick={signOut}>
+                    <button className="small-btn" onClick={() => setIsLogoutModalOpen(true)}>
                       로그아웃
                     </button>
                   </article>
@@ -718,6 +724,12 @@ export default function MyPage() {
           </div>
         )}
       </section>
+      <LogoutConfirmModal
+        isOpen={isLogoutModalOpen}
+        isLoading={isSigningOut}
+        onCancel={() => setIsLogoutModalOpen(false)}
+        onConfirm={signOut}
+      />
     </main>
   );
 }

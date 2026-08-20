@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createBrowserSupabaseClient } from "../lib/supabase/client";
+import LogoutConfirmModal from "./LogoutConfirmModal";
 
 type NavigationProps = {
   activePage?: "leak" | "sms" | "mypage";
@@ -13,6 +14,8 @@ export default function Navigation({ activePage, guideButton = false }: Navigati
   const router = useRouter();
   const supabase = useMemo(() => createBrowserSupabaseClient(), []);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
+  const [isSigningOut, setIsSigningOut] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
@@ -36,19 +39,24 @@ export default function Navigation({ activePage, guideButton = false }: Navigati
   };
 
   const handleSignOut = async () => {
+    setIsSigningOut(true);
+
     const { error } = await supabase.auth.signOut();
     if (error) {
+      setIsSigningOut(false);
       alert("로그아웃에 실패했습니다. 잠시 후 다시 시도해주세요.");
       return;
     }
 
+    setIsLogoutModalOpen(false);
     setIsLoggedIn(false);
     router.push("/banner");
     router.refresh();
   };
 
   return (
-    <header className="nav">
+    <>
+      <header className="nav">
       <a href="/banner" className="brand" aria-label="LeakCare 홈">
         <img className="brand-logo" src="/images/leakcare-logo.png" alt="" />
       </a>
@@ -62,11 +70,18 @@ export default function Navigation({ activePage, guideButton = false }: Navigati
         <a href="/sms" aria-current={activePage === "sms" ? "page" : undefined}>의심 문자 분석</a>
         <a href="/mypage" aria-current={activePage === "mypage" ? "page" : undefined}>마이페이지</a>
         {isLoggedIn ? (
-          <button className="nav-text-button" type="button" onClick={handleSignOut}>로그아웃</button>
+          <button className="nav-text-button" type="button" onClick={() => setIsLogoutModalOpen(true)}>로그아웃</button>
         ) : (
           <a href="/login">로그인</a>
         )}
       </nav>
-    </header>
+      </header>
+      <LogoutConfirmModal
+        isOpen={isLogoutModalOpen}
+        isLoading={isSigningOut}
+        onCancel={() => setIsLogoutModalOpen(false)}
+        onConfirm={handleSignOut}
+      />
+    </>
   );
 }
