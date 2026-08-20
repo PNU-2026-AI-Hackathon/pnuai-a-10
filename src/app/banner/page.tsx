@@ -27,24 +27,28 @@ const guideSteps = [
     title: "통지문 입력",
     description:
       "사용자가 통지받은 개인정보 유출 안내 문자 및 이메일 자료를 입력합니다.",
+    image: "/images/banner/guide-step-1.png",
   },
   {
     step: "STEP 2",
     title: "유출 항목 추출",
     description:
       "유출 항목을 분석하고 기준에 따라 점수를 부과하고 추출합니다.",
+    image: "/images/banner/guide-step-2.png",
   },
   {
     step: "STEP 3",
     title: "2차 피해 분석",
     description:
       "유출된 항목의 조합을 바탕으로 스미싱, 피싱 등 실제로 주의해야 할 2차 피해 위험 유형을 분석하고 전체적인 위험도를 제공합니다.",
+    image: "/images/banner/guide-step-3.png",
   },
   {
     step: "STEP 4",
     title: "대응 체크리스트 생성",
     description:
       "위험도를 모두 분석해 사용자가 취해야 할 조치를 우선순위에 따라 대응 체크리스트로 제공합니다.",
+    image: "/images/banner/guide-step-4.png",
   },
 ] as const;
 
@@ -220,14 +224,117 @@ export default function BannerPage() {
                   <h3>{guide.title}</h3>
                   <p>{guide.description}</p>
                 </div>
-                <div
-                  className="guide-image-placeholder"
-                  role="img"
-                  aria-label={`${guide.title} 이미지가 들어갈 자리`}
-                />
+                <div className="guide-image-placeholder">
+                  <img src={guide.image} alt={`${guide.title} 화면 예시`} />
+                </div>
               </article>
             ))}
           </div>
+
+          <section className="terms-section guide-reveal" aria-labelledby="terms-title">
+            <div className="terms-inner">
+              <h2 id="terms-title">이용 약관</h2>
+
+              <div className="terms-content">
+                <p>
+                  <strong>
+                    LeakCare 위험지수는 개인정보보호위원회, 개인정보 포털,
+                    한국인터넷진흥원 등의 개인정보 분류·보호조치·유출 대응자료를
+                    참고하여 LeakCare가 자체 설계한 상대적 위험도 지표입니다.
+                  </strong>
+                </p>
+                <p>
+                  최종 점수는 유출 항목별 기본점수, 여러 개인정보가 결합됐을
+                  때의 조합 위험, 금융·인증·고유식별정보의 직접 피해 가능성을
+                  종합하여 최대 100점으로 계산합니다.
+                </p>
+                <p>
+                  본 점수는 실제 피해 발생 확률이나 공식기관이 부여한 점수를
+                  의미하지 않으며, 사용자가 대응의 우선순위를 판단하도록 돕기
+                  위한 참고 지표입니다.
+                </p>
+                <p>
+                  개인정보보호위원회의 민감도 기준에 따라 정보는 생체정보와
+                  건강정보 등의 민감정보와 주민등록번호, 여권번호 등의
+                  고유식별정보로 구분되며, 민감도 악용 가능성, 변경 가능성, 피해
+                  규모를 종합적으로 고려한 위험도 평가 요소와 개인정보 유출 등
+                  사고 대응 매뉴얼, 개인정보의 안전성 확보조치 기준 등
+                  한국인터넷진흥원 공식 자료에 기반하여 상대적 위험도를
+                  산정합니다.
+                </p>
+                <p>
+                  개인정보 유출 사고 발생 시에는 스마트폰 내 ‘스팸으로 신고’
+                  기능을 활용하거나, 전기통신금융사기 통합신고대응센터의
+                  ‘간편제보하기’ 및 보호나라 카카오톡 채널의 ‘스미싱·피싱
+                  확인서비스’를 통해 스미싱 문자 신고와 악성 여부 판별을 진행할
+                  수 있으며, 관련 상담은 국번 없이 1394(전기통신금융사기
+                  통합신고대응센터)나 118(한국인터넷진흥원 인터넷침해대응센터)을
+                  통해 문의할 수 있습니다.
+                </p>
+                <p>
+                  본 서비스는 경찰청 사이버수사대 지침에 따라 유출 사실을
+                  통지받은 문자·이메일, 회사의 안내문, 유출 항목 및 일시, 회사명,
+                  유출 원인, 화면 캡처, 이후의 스미싱 내역, 관련 URL 및 발신번호,
+                  금전 피해·계정 탈취 관련 자료 등을 바탕으로 신고문 작성 요령과
+                  절차를 안내합니다.
+                </p>
+              </div>
+            </div>
+
+            <div
+              className="institution-marquee"
+              aria-label="개인정보 유출 관련 기관"
+            >
+              <div className="institution-marquee-track">
+                <div className="institution-logo-set">
+                  <img
+                    src="/images/banner/institution-logos.png"
+                    alt="사이버캅 NETAN, 개인정보보호위원회, 한국인터넷진흥원 KISA"
+                  />
+                </div>
+                <div className="institution-logo-set" aria-hidden="true">
+                  <img
+                    src="/images/banner/institution-logos.png"
+                    alt=""
+                  />
+                </div>
+              </div>
+            </div>
+
+            <footer className="banner-footer">
+              <div className="banner-footer-brand">
+                <strong>Leakcare</strong>
+                <p>
+                  (주) 창의융합 AI해커톤&nbsp; | &nbsp;코드덤센터&nbsp; | &nbsp;팀장
+                  이수빈&nbsp; | &nbsp;Tel - 010 2222 2222
+                </p>
+                <div className="banner-footer-social" aria-label="소셜 미디어">
+                  <span aria-label="Instagram">◎</span>
+                  <span aria-label="LinkedIn">in</span>
+                  <span aria-label="X">𝕏</span>
+                </div>
+              </div>
+
+              <nav className="banner-footer-links" aria-label="하단 메뉴">
+                <div>
+                  <strong>분석하기</strong>
+                  <a href="/leak">유출문자 분석하기</a>
+                  <a href="/sms">의심문자 분석하기</a>
+                </div>
+                <div>
+                  <strong>정책</strong>
+                  <a href="#guide">이용안내</a>
+                  <a href="#terms-title">이용약관</a>
+                </div>
+                <div>
+                  <strong>로그인</strong>
+                  <a href="/mypage">마이페이지</a>
+                  <a href="/login">개인정보</a>
+                  <a href="/mypage">분석 이력 조회</a>
+                </div>
+              </nav>
+            </footer>
+          </section>
 
         </section>
       </main>
