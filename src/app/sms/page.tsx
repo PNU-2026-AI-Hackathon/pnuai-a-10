@@ -1,0 +1,403 @@
+"use client";
+
+import { useState, type CSSProperties } from "react";
+import Navigation from "../../components/Navigation";
+import { extractTextFromImage } from "../../lib/ocr";
+import type { SmsAnalysisResult } from "../../types/analysis";
+import { supportAgencyLinks } from "../../data/providerLinks";
+import { getRiskSources } from "../../data/riskSources";
+
+const sampleText = `[Web발신] 개인정보 유출 보상금 지급 대상자입니다.
+아래 링크에서 본인인증을 완료하면 보상금이 지급됩니다.
+http://leak-pay-support.example`;
+
+const resourcePanelStyle: CSSProperties = {
+  marginTop: "14px",
+  padding: "4px 18px",
+  border: "1px solid #ddd6fe",
+  borderRadius: "14px",
+  background: "linear-gradient(135deg, #EEF2FF 0%, #EDE9FE 100%)",
+};
+
+const officialSourcePanelStyle: CSSProperties = {
+  marginTop: "14px",
+  padding: "4px 18px",
+  border: "1px solid #e3e6eb",
+  borderRadius: "14px",
+  background: "#f5f6f8",
+};
+
+const smsOfficialSources = getRiskSources([1, 2, 3, 4]);
+
+export default function SmsPage() {
+  const [text, setText] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [showResult, setShowResult] = useState(false);
+  const [ocrLoading, setOcrLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [result, setResult] = useState<SmsAnalysisResult | null>(null);
+
+  const analyze = async () => {
+    if (!text.trim()) {
+      setErrorMessage("의심 문자를 입력해주세요.");
+      return;
+    }
+
+    setShowResult(false);
+    setResult(null);
+    setErrorMessage("");
+    setLoading(true);
+
+    try {
+      const response = await fetch("/api/sms", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          inputText: text,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "의심 문자 분석에 실패했습니다.");
+      }
+
+      console.log("의심 문자 분석 결과:", data);
+      setResult(data);
+      setShowResult(true);
+    } catch (error) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : "분석 중 알 수 없는 오류가 발생했습니다.";
+
+      setErrorMessage(message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleImageUpload = async (file: File | undefined) => {
+    if (!file) return;
+
+    setOcrLoading(true);
+    setErrorMessage("");
+
+    try {
+      const extractedText = await extractTextFromImage(file);
+      setText(extractedText);
+      setShowResult(false);
+      setResult(null);
+    } catch (error) {
+      console.error("OCR 처리 실패:", error);
+      setErrorMessage("이미지에서 문자 내용을 추출하지 못했습니다.");
+    } finally {
+      setOcrLoading(false);
+    }
+  };
+
+  const reset = () => {
+    setText("");
+    setShowResult(false);
+    setLoading(false);
+    setResult(null);
+    setErrorMessage("");
+  };
+
+  return (
+    <main className="analysis-page">
+      <Navigation activePage="sms" />
+
+      <section className="workspace single-workspace">
+        <div className="section-heading">
+          <div>
+            <h2>의심 문자 분석</h2>
+            <p>
+              유출 사고 이후 받은 보상금, 환불, 본인인증 요구 문자의
+              피싱·스미싱 가능성을 분석합니다.
+            </p>
+          </div>
+        </div>
+
+        <div className="app-shell">
+          <section className="panel">
+            <div className="input-area">
+              <label className="field-label">
+                <span>의심 문자 입력</span>
+                <span>링크·발신 내용·요구 행동 분석</span>
+              </label>
+
+              <textarea
+                value={text}
+                onChange={(e) => setText(e.target.value)}
+                placeholder="해킹 또는 개인정보 유출이 의심되는 문자를 입력해주세요."
+              />
+
+              <label className="upload-box">
+                <span>
+                  {ocrLoading
+                    ? "이미지에서 문자 내용을 추출하는 중입니다."
+                    : "문자 화면을 캡처한 이미지를 업로드하면 텍스트를 추출합니다."}
+                </span>
+
+                <span className="upload-pill">
+                  {ocrLoading ? (
+                    <span
+                    className="loading-dots"
+                    role="status"
+                    aria-label="이미지 문자 추출 중"
+                    >
+                      <span></span>
+                      <span></span>
+                      <span></span>
+                </span>
+                  ) : (
+                    "이미지 업로드"
+                  )}
+                  </span>
+
+                <input
+                  type="file"
+                  accept="image/*"
+                  hidden
+                  disabled={ocrLoading || loading}
+                  onChange={(e) =>
+                    handleImageUpload(e.target.files?.[0])
+                  }
+                />
+              </label>
+
+              <div className="sample-row">
+                <button
+                  className="sample-btn"
+                  onClick={() => setText(sampleText)}
+                >
+                  의심 문자 예시 불러오기
+                </button>
+              </div>
+
+              <div className="analyze-row">
+                <p className="notice">
+                  문자의 링크, 발신 내용, 요구 행동을 기준으로 위험 유형과
+                  위험도를 분석합니다.
+                </p>
+
+                <div className="analyze-buttons">
+                  <button
+                    type="button"
+                    className="ghost-btn"
+                    onClick={reset}
+                    disabled={loading}
+                  >
+                    초기화
+                  </button>
+
+                  <button
+                    type="button"
+                    className="primary-btn"
+                    onClick={analyze}
+                    disabled={loading}
+                  >
+                    {loading ? "분석 중..." : "AI 분석하기"}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section className="panel">
+            <div className="results">
+              {errorMessage && (
+                <div className="info-card full">
+                  <h4>
+                    <span className="icon-dot"></span>입력 오류
+                  </h4>
+                  <p>{errorMessage}</p>
+                </div>
+              )}
+
+              {loading && (
+                <div className="result-top">
+                  <div>
+                    <h3>AI 분석 중입니다</h3>
+                    <p>
+                      링크, 발신 내용, 요구 행동을 기준으로 위험성을 분석합니다.
+                    </p>
+                  </div>
+
+                  <div className="score-badge">
+                    <div
+                      className="loading-dots"
+                      role="status"
+                      aria-label="AI 분석 중"
+                    >
+                      <span></span>
+                      <span></span>
+                      <span></span>
+                    </div>
+
+                    <span>분석 중</span>
+                  </div>
+                </div>
+              )}
+
+              {!loading && !showResult && (
+                <div className="result-top">
+                  <div>
+                    <h3>분석 결과 대기 중</h3>
+                    <p>의심 문자를 입력하고 AI 분석하기 버튼을 눌러주세요.</p>
+                  </div>
+
+                  <div className="score-badge">
+                    <strong>--</strong>
+                    <span>위험도</span>
+                  </div>
+                </div>
+              )}
+
+              {showResult && result && (
+                <>
+                  <div className="result-top">
+                    <div>
+                      <h3>의심 문자 분석 결과</h3>
+                      <p>{result.reason}</p>
+                    </div>
+
+                    <div className="score-badge">
+                      <strong>{result.riskLevel}</strong>
+                      <span>위험도</span>
+                    </div>
+                  </div>
+
+                  <div className="card-grid">
+                    <article className="info-card">
+                      <h4>
+                        <span className="icon-dot"></span> 위험 신호
+                      </h4>
+
+                      <div className="chips">
+                        <span className="chip danger">외부 링크 포함</span>
+                        <span className="chip danger">본인인증 요구</span>
+                        <span className="chip danger">보상금 사칭</span>
+                      </div>
+                    </article>
+
+                    <article className="info-card">
+                      <h4>
+                        <span className="icon-dot"></span> 위험 유형
+                      </h4>
+
+                      <div className="chips">
+                        {result.riskTypes.map((item) => (
+                          <span className="chip danger" key={item}>
+                            {item}
+                          </span>
+                        ))}
+                      </div>
+                    </article>
+
+                    <article className="info-card full">
+                      <h4>
+                        <span className="icon-dot"></span> 우선 대응 체크리스트
+                      </h4>
+
+                      <ul
+                        className="check-list sms-check-list"
+                        data-risk-level={result.riskLevel}
+                      >
+                        {result.recommendedActions.map((item, index) => (
+                          <li key={`${item.id}-${index}`}>
+                            <span className="num">{index + 1}</span>
+
+                            <span>
+                              <strong>{item.title}</strong>
+                              <br />
+                              {item.description}
+                            </span>
+                          </li>
+                        ))}
+                      </ul>
+                    </article>
+
+                    <article className="info-card full">
+                      <h4>
+                        <span className="icon-dot"></span> 신고·상담 기관
+                      </h4>
+
+                      <div style={resourcePanelStyle}>
+                        {supportAgencyLinks.map((agency, index) => (
+                          <div
+                            key={agency.label}
+                            className="sms-resource-row"
+                            style={{
+                              borderBottom:
+                                index === supportAgencyLinks.length - 1
+                                  ? "none"
+                                  : "1px solid #dde1e7",
+                            }}
+                          >
+                            <div style={{ minWidth: 0 }}>
+                              <strong>{agency.label}</strong>
+                              <span>{agency.description}</span>
+                            </div>
+                            {agency.url && (
+                              <a
+                                href={agency.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                              >
+                                바로가기
+                              </a>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </article>
+
+                    <article className="info-card full">
+                      <h4>
+                        <span className="icon-dot"></span> 공식 참고 자료
+                      </h4>
+
+                      <div style={officialSourcePanelStyle}>
+                        {smsOfficialSources.map((source, index) => (
+                          <div
+                            key={source.sourceId}
+                            className="sms-resource-row"
+                            style={{
+                              borderBottom:
+                                index === smsOfficialSources.length - 1
+                                  ? "none"
+                                  : "1px solid #dde1e7",
+                            }}
+                          >
+                            <div style={{ minWidth: 0 }}>
+                              <strong>{source.organization}</strong>
+                              <span>{source.title}</span>
+                            </div>
+                            {source.url && (
+                              <a
+                                href={source.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                              >
+                                원문 보기
+                              </a>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    </article>
+                  </div>
+                </>
+              )}
+            </div>
+          </section>
+        </div>
+      </section>
+    </main>
+  );
+}
