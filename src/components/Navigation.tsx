@@ -34,10 +34,6 @@ export default function Navigation({ activePage, guideButton = false }: Navigati
     };
   }, [supabase]);
 
-  const handleGuideClick = () => {
-    document.getElementById("guide")?.scrollIntoView({ behavior: "smooth", block: "start" });
-  };
-
   const handleSignOut = async () => {
     setIsSigningOut(true);
 
@@ -54,27 +50,39 @@ export default function Navigation({ activePage, guideButton = false }: Navigati
     router.refresh();
   };
 
+  const renderMenuItems = () => (
+    <>
+      <a href={guideButton ? "#guide" : "/banner#guide"}>이용 안내</a>
+      <a href="/leak" aria-current={activePage === "leak" ? "page" : undefined}>유출 안내문 분석</a>
+      <a href="/sms" aria-current={activePage === "sms" ? "page" : undefined}>의심 문자 분석</a>
+      <a href="/mypage" aria-current={activePage === "mypage" ? "page" : undefined}>마이페이지</a>
+      {isLoggedIn ? (
+        <button className="nav-text-button" type="button" onClick={() => setIsLogoutModalOpen(true)}>로그아웃</button>
+      ) : (
+        <a href="/login">로그인</a>
+      )}
+    </>
+  );
+
   return (
     <>
       <header className="nav">
       <a href="/banner" className="brand" aria-label="LeakCare 홈">
         <img className="brand-logo" src="/images/leakcare-logo.png" alt="" />
       </a>
-      <nav className="nav-menu" aria-label="주요 메뉴">
-        {guideButton ? (
-          <button className="nav-text-button" onClick={handleGuideClick}>이용 안내</button>
-        ) : (
-          <a href="/banner#guide">이용 안내</a>
-        )}
-        <a href="/leak" aria-current={activePage === "leak" ? "page" : undefined}>유출 안내문 분석</a>
-        <a href="/sms" aria-current={activePage === "sms" ? "page" : undefined}>의심 문자 분석</a>
-        <a href="/mypage" aria-current={activePage === "mypage" ? "page" : undefined}>마이페이지</a>
-        {isLoggedIn ? (
-          <button className="nav-text-button" type="button" onClick={() => setIsLogoutModalOpen(true)}>로그아웃</button>
-        ) : (
-          <a href="/login">로그인</a>
-        )}
+      <nav className="nav-menu nav-menu-desktop" aria-label="주요 메뉴">
+        {renderMenuItems()}
       </nav>
+      <details className="nav-mobile-menu">
+        <summary aria-label="메뉴 열기">
+          <span></span>
+          <span></span>
+          <span></span>
+        </summary>
+        <nav className="nav-menu nav-menu-mobile" aria-label="모바일 주요 메뉴">
+          {renderMenuItems()}
+        </nav>
+      </details>
       </header>
       <LogoutConfirmModal
         isOpen={isLogoutModalOpen}
