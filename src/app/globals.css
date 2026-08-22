@@ -343,6 +343,10 @@ input {
   letter-spacing: -0.055em;
 }
 
+.mobile-title-break {
+  white-space: nowrap;
+}
+
 .feature-showcase-heading p {
   margin: 0;
   color: var(--muted);
@@ -361,7 +365,7 @@ input {
   min-width: 0;
   padding: 0;
   color: var(--text);
-  text-align: left;
+  text-align: center;
 }
 
 .feature-tab strong,
@@ -1324,6 +1328,20 @@ textarea:focus {
     padding-bottom: 54px;
   }
 
+  .hero .hero-actions {
+    width: 100%;
+    flex-wrap: nowrap;
+    gap: 8px;
+  }
+
+  .hero .hero-actions a {
+    min-width: 0;
+    flex: 1 1 0;
+    padding: 12px 8px;
+    font-size: 13px;
+    white-space: nowrap;
+  }
+
   .stats {
     grid-template-columns: 1fr;
     padding-left: 18px;
@@ -1331,9 +1349,15 @@ textarea:focus {
   }
 
   .feature-showcase {
-    width: auto;
-    margin: 0 18px;
-    padding: 34px 0 54px;
+    width: 100%;
+    margin: 0;
+    padding: 34px 18px 54px;
+    background: linear-gradient(
+      to bottom,
+      rgba(255, 255, 255, 0) 0,
+      rgba(255, 255, 255, 0.82) 96px,
+      #fff 150px
+    );
   }
 
   .feature-showcase-heading {
@@ -1344,25 +1368,35 @@ textarea:focus {
     font-size: 15px;
   }
 
+  .mobile-title-break {
+    display: block;
+  }
+
   .feature-tabs {
     margin-top: 0;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 12px;
+    grid-template-columns: 1fr;
+    gap: 32px;
   }
 
   .feature-tab {
-    padding: 10px 0 2px;
+    padding: 4px 0;
+    text-align: center;
   }
 
   .feature-tab strong {
-    margin-bottom: 6px;
-    font-size: 14px;
+    margin-bottom: 8px;
+    font-size: 17px;
     line-height: 1.4;
   }
 
   .feature-tab span {
-    font-size: 12px;
-    line-height: 1.55;
+    width: 100%;
+    max-width: 300px;
+    margin: 0 auto;
+    padding: 0 14px;
+    font-size: 14px;
+    line-height: 1.65;
+    word-break: keep-all;
   }
 
   .card-grid {

@@ -50,6 +50,13 @@ const guideSteps = [
       "위험도를 모두 분석해 사용자가 취해야 할 조치를 우선순위에 따라 대응 체크리스트로 제공합니다.",
     image: "/images/banner/guide-step-4.png",
   },
+  {
+    step: "STEP 5",
+    title: "공유용 안내문 & 신고문 생성",
+    description:
+      "복잡한 유출 내용을 쉬운 안내문으로 요약해 공유하며, 유출내용을 기반으로 신고문 PDF 생성 기능을 제공합니다.",
+    image: "/images/banner/family-guide.png",
+  },
 ] as const;
 
 export default function BannerPage() {
@@ -185,7 +192,9 @@ export default function BannerPage() {
           aria-labelledby="feature-showcase-title"
         >
           <div className="feature-showcase-heading">
-            <h2 id="feature-showcase-title">유출 이후의 대응을 한 눈에</h2>
+            <h2 id="feature-showcase-title">
+              유출 이후의 대응을 <span className="mobile-title-break">한 눈에</span>
+            </h2>
             <p>분석부터 2차 피해 예방, 가족 공유까지 LeakCare가 함께 정리합니다.</p>
           </div>
 

@@ -113,6 +113,7 @@ export default function ReminderBanner() {
           display: "flex",
           alignItems: "center",
           gap: "8px",
+          flexShrink: 0,
         }}
       >
         <a
@@ -139,6 +140,8 @@ export default function ReminderBanner() {
             color: "#9a3412",
             cursor: "pointer",
             fontWeight: 700,
+            whiteSpace: "nowrap",
+            flexShrink: 0,
           }}
         >
           닫기
