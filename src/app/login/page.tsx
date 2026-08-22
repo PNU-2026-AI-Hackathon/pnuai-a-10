@@ -19,7 +19,7 @@ export default function LoginPage() {
   };
 
   return (
-    <main className="analysis-page">
+    <main className="analysis-page login-page">
       <header className="analysis-header">
         <a href="/banner" className="brand" aria-label="LeakCare 홈">
           <img className="brand-logo" src="/images/leakcare-logo.png" alt="" />
@@ -27,7 +27,7 @@ export default function LoginPage() {
       </header>
 
       <section
-        className="workspace"
+        className="workspace login-workspace"
         style={{
           minHeight: "calc(100vh - 90px)",
           display: "flex",
@@ -36,16 +36,16 @@ export default function LoginPage() {
         }}
       >
         <div
-          className="panel"
+          className="panel login-panel"
           style={{
             width: "100%",
             maxWidth: "480px",
             padding: "36px",
           }}
         >
-          <div className="results">
+          <div className="results login-results">
             <div
-              className="result-top"
+              className="result-top login-intro"
               style={{
                 marginBottom: "24px",
               }}
@@ -59,7 +59,7 @@ export default function LoginPage() {
             </div>
 
             <div
-              className="action-buttons"
+              className="action-buttons login-actions"
               style={{
                 display: "flex",
                 flexDirection: "column",
@@ -81,14 +81,7 @@ export default function LoginPage() {
               </button>
             </div>
 
-            <p
-              style={{
-                marginTop: "20px",
-                color: "#64748b",
-                fontSize: "14px",
-                lineHeight: "1.6",
-              }}
-            >
+            <p className="login-help">
               버튼을 누르면 Google 또는 Kakao 로그인 화면으로 이동합니다.
             </p>
           </div>

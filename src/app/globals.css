@@ -1346,17 +1346,23 @@ textarea:focus {
 
   .feature-tabs {
     margin-top: 0;
-    grid-template-columns: 1fr;
-    gap: 18px;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
   }
 
   .feature-tab {
-    padding: 14px 0 2px;
+    padding: 10px 0 2px;
   }
 
   .feature-tab strong {
-    margin-bottom: 4px;
-    font-size: 17px;
+    margin-bottom: 6px;
+    font-size: 14px;
+    line-height: 1.4;
+  }
+
+  .feature-tab span {
+    font-size: 12px;
+    line-height: 1.55;
   }
 
   .card-grid {
@@ -1689,6 +1695,69 @@ textarea:focus {
   border-radius: 6px;
   padding: 9px 15px;
   font-weight: 800;
+}
+
+/* 로그인 화면 */
+.login-help {
+  margin: 20px 0 0;
+  color: #64748b;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.login-intro h3 {
+  text-align: center;
+}
+
+.login-intro p {
+  text-align: center;
+}
+
+@media (max-width: 680px) {
+  .login-workspace {
+    padding-top: 42px;
+    padding-bottom: 42px;
+  }
+
+  .login-panel {
+    padding: 22px !important;
+  }
+
+  .login-results {
+    gap: 22px;
+    padding: 18px;
+  }
+
+  .login-intro {
+    margin-bottom: 6px !important;
+    padding: 24px;
+  }
+
+  .login-intro h3 {
+    margin-bottom: 12px;
+    font-size: 24px;
+  }
+
+  .login-intro p {
+    font-size: 15px;
+    line-height: 1.7;
+  }
+
+  .login-actions {
+    gap: 14px !important;
+  }
+
+  .login-actions .small-btn {
+    min-height: 58px;
+    padding: 15px 18px;
+    font-size: 16px;
+  }
+
+  .login-help {
+    margin-top: 10px;
+    font-size: 15px;
+    line-height: 1.75;
+  }
 }
 
 .login-btn {
