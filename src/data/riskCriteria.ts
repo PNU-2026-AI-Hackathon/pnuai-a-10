@@ -142,6 +142,33 @@ export const RISK_CRITERIA = {
     possibleDamages: ["명의도용", "본인인증 악용", "불법 가입"],
     sourceIds: [5, 8],
   },
+
+  여권번호: {
+    weight: 35,
+    category: "고유식별정보",
+    riskReason:
+      "여권번호는 공식 신분 확인에 사용되는 고유식별정보로, 신분 사칭이나 본인확인 악용에 활용될 수 있습니다.",
+    possibleDamages: ["신분 사칭", "본인확인 악용", "피싱·사칭"],
+    sourceIds: [1, 5],
+  },
+
+  운전면허번호: {
+    weight: 35,
+    category: "고유식별정보",
+    riskReason:
+      "운전면허번호는 공식 신분증에 포함되는 고유식별정보로, 신분 사칭이나 본인확인 과정에 악용될 수 있습니다.",
+    possibleDamages: ["신분 사칭", "본인확인 악용", "피싱·사칭"],
+    sourceIds: [1, 5],
+  },
+
+  외국인등록번호: {
+    weight: 35,
+    category: "고유식별정보",
+    riskReason:
+      "외국인등록번호는 국내 체류 외국인을 식별하는 고유식별정보로, 명의도용이나 본인확인 악용에 활용될 수 있습니다.",
+    possibleDamages: ["명의도용", "본인확인 악용", "신분 사칭"],
+    sourceIds: [1, 5],
+  },
 } satisfies Record<string, RiskCriterion>;
 
 export type RiskItemKey = keyof typeof RISK_CRITERIA;
@@ -204,6 +231,12 @@ const RISK_ITEM_ALIASES: Record<string, RiskItemKey> = {
 
   주민등록번호: "주민등록번호",
   주민번호: "주민등록번호",
+
+  여권번호: "여권번호",
+
+  운전면허번호: "운전면허번호",
+
+  외국인등록번호: "외국인등록번호",
 };
 
 export const RISK_ITEM_WEIGHTS: Record<RiskItemKey, number> =
@@ -330,6 +363,33 @@ export const IMPORTANT_INFORMATION_RULES: AdjustmentRule[] = [
     sourceIds: [5, 8],
   },
   {
+    id: "passport-number-minimum-high",
+    items: ["여권번호"],
+    bonus: 15,
+    minimumScore: 40,
+    reason:
+      "여권번호는 공식 신분 확인에 사용되는 고유식별정보이므로 최소 높은 위험으로 판단합니다.",
+    sourceIds: [1, 5],
+  },
+  {
+    id: "driver-license-number-minimum-high",
+    items: ["운전면허번호"],
+    bonus: 15,
+    minimumScore: 40,
+    reason:
+      "운전면허번호는 공식 신분증에 포함되는 고유식별정보이므로 최소 높은 위험으로 판단합니다.",
+    sourceIds: [1, 5],
+  },
+  {
+    id: "alien-registration-number-minimum-high",
+    items: ["외국인등록번호"],
+    bonus: 15,
+    minimumScore: 40,
+    reason:
+      "외국인등록번호는 국내 체류 외국인을 식별하는 고유식별정보이므로 최소 높은 위험으로 판단합니다.",
+    sourceIds: [1, 5],
+  },
+  {
     id: "password-minimum-high",
     items: ["비밀번호"],
     bonus: 15,
@@ -375,6 +435,14 @@ export function normalizeRiskItem(item: string): RiskItemKey | null {
 
   if (normalized.startsWith("가입자식별번호(")) {
     return "통신가입자식별정보";
+  }
+
+  if (
+    normalized.startsWith("유심인증키") ||
+    normalized.startsWith("USIM인증키") ||
+    normalized.startsWith("SIM인증키")
+  ) {
+    return "통신인증정보";
   }
 
   return null;
