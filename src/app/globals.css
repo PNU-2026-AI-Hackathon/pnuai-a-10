@@ -1997,6 +1997,18 @@ textarea:focus {
   font-weight: 700;
 }
 
+.result-risk-level[data-risk-level="높음"] {
+  color: #dc2626;
+}
+
+.result-risk-level[data-risk-level="보통"] {
+  color: #d97706;
+}
+
+.result-risk-level[data-risk-level="낮음"] {
+  color: #059669;
+}
+
 .mypage-workspace .check-list > li::after {
   content: none;
 }

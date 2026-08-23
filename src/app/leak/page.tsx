@@ -1080,6 +1080,8 @@ export default function LeakPage() {
                             / 100
                           </span>
                           <strong
+                            className="result-risk-level"
+                            data-risk-level={result.riskLevel}
                             style={{
                               marginLeft: "4px",
                               fontSize: "15px",
@@ -1310,23 +1312,14 @@ export default function LeakPage() {
                         >
                           공유하기
                         </button>
-                      </div>
-                    </article>
-
-                    <article className="info-card full">
-                      <h4>
-                        <span className="icon-dot"></span> 다음 작업
-                      </h4>
-
-                      <div className="action-buttons">
                         <button
-                        type="button"
+                          type="button"
                           className="small-btn"
                           onClick={saveAsPdf}
                         >
                           PDF 저장
                         </button>
-                     </div>
+                      </div>
                     </article>
                     <ReportSummaryPanel analysisResult={result} />
                   </div>
