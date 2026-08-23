@@ -80,6 +80,31 @@ export const RISK_CRITERIA = {
     sourceIds: [3, 6, 7],
   },
 
+  CI: {
+    weight: 20,
+    category: "본인확인 연계정보",
+    riskReason:
+      "CI는 본인확인 과정에서 생성되는 연계정보로, 여러 서비스에서 동일인을 연결하는 데 이용될 수 있어 다른 개인정보와 결합될 경우 개인 식별 및 사칭 위험을 높일 수 있습니다.",
+    possibleDamages: [
+      "개인 식별 보강",
+      "개인화된 피싱·사칭",
+      "서비스 간 정보 연계",
+    ],
+    sourceIds: [10],
+  },
+
+  DI: {
+    weight: 10,
+    category: "본인확인 식별정보",
+    riskReason:
+      "DI는 서비스 내 중복가입 여부 확인 등에 사용되는 정보로, 계정정보나 연락처와 결합될 경우 사용자 식별과 사칭을 보강할 수 있습니다.",
+    possibleDamages: [
+      "계정 식별 보강",
+      "개인화된 피싱·사칭",
+    ],
+    sourceIds: [10],
+  },
+
   통신가입자식별정보: {
     weight: 10,
     category: "통신 가입자 식별정보",
@@ -123,6 +148,19 @@ export const RISK_CRITERIA = {
       "비밀번호는 계정 접근에 직접 사용되는 인증정보이므로 단독 유출만으로도 계정 탈취 위험이 있습니다.",
     possibleDamages: ["계정 탈취", "다른 서비스 계정 침해", "결제수단 악용"],
     sourceIds: [3, 5, 6, 7],
+  },
+
+  IMEI: {
+    weight: 10,
+    category: "통신 단말 식별정보",
+    riskReason:
+      "IMEI는 휴대전화 단말을 식별하는 정보로, 휴대전화번호나 가입자 식별정보와 결합될 경우 특정 사용자와 단말을 연결하는 데 활용될 수 있습니다.",
+    possibleDamages: [
+      "단말 식별",
+      "통신사 사칭 보강",
+      "개인화된 피싱·사칭",
+    ],
+    sourceIds: [11, 12],
   },
 
   통신인증정보: {
@@ -180,6 +218,8 @@ export type RiskItemKey = keyof typeof RISK_CRITERIA;
 const RISK_ITEM_ALIASES: Record<string, RiskItemKey> = {
   이름: "이름",
   성명: "이름",
+  실명: "이름",
+  입력한이름: "이름",
 
   생년월일: "생년월일",
 
@@ -189,6 +229,7 @@ const RISK_ITEM_ALIASES: Record<string, RiskItemKey> = {
   주소: "주소",
   거주지: "주소",
   배송지: "주소",
+  본인주소: "주소",
 
   주문내역: "주문내역",
   주문정보: "주문내역",
@@ -203,11 +244,20 @@ const RISK_ITEM_ALIASES: Record<string, RiskItemKey> = {
   계정ID: "계정정보",
   로그인정보: "계정정보",
 
+  CI: "CI",
+  연계정보: "CI",
+
+  DI: "DI",
+  중복가입확인정보: "DI",
+
   통신가입자식별정보: "통신가입자식별정보",
   IMSI: "통신가입자식별정보",
   가입자식별번호: "통신가입자식별정보",
   "가입자식별번호(IMSI)": "통신가입자식별정보",
   국제이동가입자식별번호: "통신가입자식별정보",
+
+  IMEI: "IMEI",
+  단말기식별번호: "IMEI",
 
   통신인증정보: "통신인증정보",
   유심인증키: "통신인증정보",
@@ -221,6 +271,7 @@ const RISK_ITEM_ALIASES: Record<string, RiskItemKey> = {
   계좌정보: "계좌번호",
   통장계좌번호: "계좌번호",
   은행계좌번호: "계좌번호",
+  환불계좌번호: "계좌번호",
 
   카드번호: "카드번호",
   카드정보: "카드번호",
@@ -431,6 +482,16 @@ export function normalizeRiskItem(item: string): RiskItemKey | null {
 
   if (alias) {
     return alias;
+  }
+
+  const withoutTrailingParenthetical = normalized.replace(/\([^()]*\)$/, "");
+  const aliasWithoutTrailingParenthetical =
+    withoutTrailingParenthetical !== normalized
+      ? RISK_ITEM_ALIASES[withoutTrailingParenthetical]
+      : null;
+
+  if (aliasWithoutTrailingParenthetical) {
+    return aliasWithoutTrailingParenthetical;
   }
 
   if (normalized.startsWith("가입자식별번호(")) {

@@ -72,6 +72,27 @@ export const RISK_SOURCES: Record<number, RiskSource> = {
     title: "개인정보위 조사공문 사칭 전화사기 피해 주의",
     url: "https://m.pipc.go.kr/np/cop/bbs/selectBoardArticle.do?bbsId=BS074&mCode=C020010000&nttId=10691",
   },
+
+  10: {
+    sourceId: 10,
+    organization: "본인확인 지원포털",
+    title: "본인확인 용어 정리",
+    url: "https://identity.kisa.or.kr/web/main/contents/M010-05",
+  },
+
+  11: {
+    sourceId: 11,
+    organization: "스마트초이스",
+    title: "단말기 식별번호(IMEI) 관리 안내",
+    url: "https://www.smartchoice.or.kr/smc/mobile/find_guide03.do",
+  },
+
+  12: {
+    sourceId: 12,
+    organization: "개인정보보호위원회",
+    title: "개인정보위, (주)KT의 개인정보 유출사고 제재처분 의결",
+    url: "https://pipc.go.kr/np/cop/bbs/selectBoardArticle.do?bbsId=BS074&nttId=12349",
+  },
 };
 
 /**
