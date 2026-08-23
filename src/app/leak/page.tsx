@@ -6,6 +6,7 @@ import fontkit from "@pdf-lib/fontkit";
 import { extractTextFromImage } from "../../lib/ocr";
 import {
   providerLinks,
+  providerShortcutGroups,
   supportAgencyLinks,
 } from "../../data/providerLinks";
 import type {
@@ -361,14 +362,39 @@ const accountSecurityLinkUrls = new Set(
   [
     providerLinks.googleSecurity.url,
     providerLinks.naverLoginHistory.url,
-  ].map((url) => url.trim().toLowerCase())
+  ].map((url) => normalizeShortcutUrl(url))
+    .filter((url): url is string => Boolean(url))
 );
 
 const supportAgencyLinkUrls = new Set(
   supportAgencyLinks
-    .map((link) => link.url?.trim().toLowerCase())
+    .map((link) => normalizeShortcutUrl(link.url))
     .filter((url): url is string => Boolean(url))
 );
+
+function normalizeShortcutUrl(url: string | undefined): string | undefined {
+  const normalizedUrl = url?.trim().toLowerCase().replace(/\/+$/, "");
+
+  return normalizedUrl || undefined;
+}
+
+function normalizeProviderKeyword(value: string | undefined): string {
+  return (value ?? "").toLowerCase().replace(/[\s.·_\-()+]/g, "");
+}
+
+function matchesProviderKeyword(providerText: string, keyword: string): boolean {
+  const normalizedKeyword = normalizeProviderKeyword(keyword);
+
+  if (!normalizedKeyword) {
+    return false;
+  }
+
+  if (normalizedKeyword === "kt") {
+    return providerText === normalizedKeyword || providerText.startsWith("kt");
+  }
+
+  return providerText.includes(normalizedKeyword);
+}
 
 function toShortcutItem(
   id: string,
@@ -393,13 +419,38 @@ function hasAccountSecurityChecklist(checklist: ChecklistItem[]): boolean {
       return true;
     }
 
-    const linkUrl = item.link?.url.trim().toLowerCase();
+    const linkUrl = normalizeShortcutUrl(item.link?.url);
 
     return Boolean(linkUrl && accountSecurityLinkUrls.has(linkUrl));
   });
 }
 
-function buildShortcutLinks(checklist: ChecklistItem[]): {
+function getProviderShortcutLinks(
+  company: string | undefined,
+  service: string | undefined
+): ActionLink[] {
+  const providerText = normalizeProviderKeyword(
+    `${company ?? ""} ${service ?? ""}`
+  );
+
+  if (!providerText) {
+    return [];
+  }
+
+  return providerShortcutGroups
+    .filter((group) =>
+      group.keywords.some((keyword) =>
+        matchesProviderKeyword(providerText, keyword)
+      )
+    )
+    .flatMap((group) => group.links);
+}
+
+function buildShortcutLinks(
+  checklist: ChecklistItem[],
+  company?: string,
+  service?: string
+): {
   accountSecurityGroup?: ShortcutGroup;
   shortcuts: ShortcutItem[];
 } {
@@ -416,17 +467,31 @@ function buildShortcutLinks(checklist: ChecklistItem[]): {
 
   const addShortcut = (shortcut: ShortcutItem) => {
     if (shortcut.url) {
-      const normalizedUrl = shortcut.url.trim().toLowerCase();
+      const normalizedUrl = normalizeShortcutUrl(shortcut.url);
 
-      if (seenUrls.has(normalizedUrl)) {
+      if (normalizedUrl && seenUrls.has(normalizedUrl)) {
         return;
       }
 
-      seenUrls.add(normalizedUrl);
+      if (normalizedUrl) {
+        seenUrls.add(normalizedUrl);
+      }
     }
 
     shortcuts.push(shortcut);
   };
+
+  getProviderShortcutLinks(company, service).forEach((link, index) => {
+    const shortcut = toShortcutItem(
+      `provider-${index}`,
+      link,
+      link.description ?? ""
+    );
+
+    if (shortcut) {
+      addShortcut(shortcut);
+    }
+  });
 
   checklist.forEach((item, index) => {
     if (!item.link) {
@@ -483,7 +548,9 @@ export default function LeakPage() {
   const {
     accountSecurityGroup,
     shortcuts: shortcutLinks,
-  } = result ? buildShortcutLinks(result.checklist) : { shortcuts: [] };
+  } = result
+    ? buildShortcutLinks(result.checklist, result.company, result.service)
+    : { shortcuts: [] };
   const supportShortcutLinks = supportAgencyLinks
     .filter((link) => isValidShortcutUrl(link.url))
     .map((link, index) => ({
