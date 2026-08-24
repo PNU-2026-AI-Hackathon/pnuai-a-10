@@ -32,14 +32,34 @@ type LeakFinalText = {
   reportSummary: string;
 };
 
-function getGeminiApiKey(): string {
-  const apiKey = process.env.GEMINI_API_KEY;
+type OpenRouterChatCompletionResponse = {
+  choices?: Array<{
+    message?: {
+      content?: string | null;
+    };
+  }>;
+};
+
+const OPENROUTER_ENDPOINT =
+  "https://openrouter.ai/api/v1/chat/completions";
+
+function getOpenRouterApiKey(): string {
+  const apiKey = process.env.OPENROUTER_API_KEY;
 
   if (!apiKey) {
-    throw new Error("GEMINI_API_KEY가 설정되지 않았습니다.");
+    throw new Error(
+      "Gemini API 호출 실패: OPENROUTER_API_KEY가 설정되지 않았습니다."
+    );
   }
 
   return apiKey;
+}
+
+function getOpenRouterModel(): string {
+  return (
+    process.env.OPENROUTER_MODEL?.trim() ||
+    "google/gemini-2.5-flash"
+  );
 }
 
 function normalizeRiskLevel(value: unknown): RiskLevel {
@@ -148,51 +168,47 @@ async function callGeminiJson<T>(
   prompt: string,
   signal?: AbortSignal
 ): Promise<T> {
-  const apiKey = getGeminiApiKey();
-  const model =
-    process.env.GEMINI_MODEL || "gemini-2.5-flash";
+  const apiKey = getOpenRouterApiKey();
+  const model = getOpenRouterModel();
 
-  const response = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        contents: [
-          {
-            role: "user",
-            parts: [{ text: prompt }],
-          },
-        ],
-        generationConfig: {
-          temperature: 0.2,
-          responseMimeType: "application/json",
+  const response = await fetch(OPENROUTER_ENDPOINT, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+      "HTTP-Referer":
+        process.env.NEXT_PUBLIC_SITE_URL ??
+        "https://leakcare.vercel.app",
+      "X-OpenRouter-Title": "LeakCare",
+    },
+    body: JSON.stringify({
+      model,
+      messages: [
+        {
+          role: "user",
+          content: prompt,
         },
-      }),
-      signal,
-      cache: "no-store",
-    }
-  );
+      ],
+      temperature: 0.2,
+      response_format: {
+        type: "json_object",
+      },
+    }),
+    signal,
+    cache: "no-store",
+  });
 
   if (!response.ok) {
-    const errorText = await response.text();
-
     throw new Error(
-      `Gemini API 호출 실패: ${response.status} ${errorText}`
+      `Gemini API 호출 실패: ${response.status}`
     );
   }
 
-  const data = await response.json();
+  const data =
+    (await response.json()) as OpenRouterChatCompletionResponse;
 
   const text =
-    data?.candidates?.[0]?.content?.parts
-      ?.map(
-        (part: { text?: string }) =>
-          part.text ?? ""
-      )
-      .join("") ?? "";
+    data.choices?.[0]?.message?.content?.trim() ?? "";
 
   if (!text) {
     throw new Error("Gemini 응답이 비어 있습니다.");
