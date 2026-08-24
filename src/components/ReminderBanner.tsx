@@ -1,9 +1,34 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 import { createBrowserSupabaseClient } from "../lib/supabase/client";
+import styles from "./ReminderBanner.module.css";
+
+const CHECKLIST_CACHE_PREFIX = "leakcare-incomplete-checklist:";
+
+function readChecklistCache(userId: string) {
+  try {
+    const cached = sessionStorage.getItem(`${CHECKLIST_CACHE_PREFIX}${userId}`);
+    return cached === null ? null : cached === "true";
+  } catch {
+    return null;
+  }
+}
+
+function writeChecklistCache(userId: string, hasIncompleteChecklist: boolean) {
+  try {
+    sessionStorage.setItem(
+      `${CHECKLIST_CACHE_PREFIX}${userId}`,
+      String(hasIncompleteChecklist)
+    );
+  } catch {
+    // 세션 저장소를 사용할 수 없는 환경에서는 서버 조회 결과만 사용합니다.
+  }
+}
 
 export default function ReminderBanner() {
+  const pathname = usePathname();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isDismissed, setIsDismissed] = useState(false);
   const [hasIncompleteChecklist, setHasIncompleteChecklist] = useState(false);
@@ -11,8 +36,9 @@ export default function ReminderBanner() {
   useEffect(() => {
     const supabase = createBrowserSupabaseClient();
     let isMounted = true;
+    let activeUserId: string | null = null;
 
-    const checkIncompleteChecklist = async () => {
+    const checkIncompleteChecklist = async (userId: string) => {
       try {
         const response = await fetch("/api/history", { cache: "no-store" });
 
@@ -29,6 +55,8 @@ export default function ReminderBanner() {
             item.checklist.length > 0 &&
             item.checklist.some((checkItem: { isCompleted?: boolean }) => !checkItem.isCompleted)
         );
+
+        writeChecklistCache(userId, hasIncomplete);
 
         if (isMounted) {
           setHasIncompleteChecklist(hasIncomplete);
@@ -47,10 +75,17 @@ export default function ReminderBanner() {
 
       if (isMounted) {
         const loggedIn = Boolean(session);
+        activeUserId = session?.user.id ?? null;
         setIsLoggedIn(loggedIn);
 
-        if (loggedIn) {
-          await checkIncompleteChecklist();
+        if (session) {
+          const cached = readChecklistCache(session.user.id);
+
+          if (cached !== null) {
+            setHasIncompleteChecklist(cached);
+          }
+
+          await checkIncompleteChecklist(session.user.id);
         } else {
           setHasIncompleteChecklist(false);
         }
@@ -63,17 +98,26 @@ export default function ReminderBanner() {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, session) => {
       const loggedIn = Boolean(session);
+      activeUserId = session?.user.id ?? null;
       setIsLoggedIn(loggedIn);
 
-      if (loggedIn) {
-        void checkIncompleteChecklist();
+      if (session) {
+        const cached = readChecklistCache(session.user.id);
+
+        if (cached !== null) {
+          setHasIncompleteChecklist(cached);
+        }
+
+        void checkIncompleteChecklist(session.user.id);
       } else {
         setHasIncompleteChecklist(false);
       }
     });
 
     const handleChecklistUpdate = () => {
-      void checkIncompleteChecklist();
+      if (activeUserId) {
+        void checkIncompleteChecklist(activeUserId);
+      }
     };
 
     window.addEventListener("checklist-progress-updated", handleChecklistUpdate);
@@ -85,68 +129,40 @@ export default function ReminderBanner() {
     };
   }, []);
 
-  if (!isLoggedIn || isDismissed || !hasIncompleteChecklist) {
+  if (
+    pathname === "/mypage" ||
+    !isLoggedIn ||
+    isDismissed ||
+    !hasIncompleteChecklist
+  ) {
     return null;
   }
 
   return (
-    <div
-      style={{
-        padding: "12px 24px",
-        background: "#fff7ed",
-        borderBottom: "1px solid #fed7aa",
-        color: "#9a3412",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-        gap: "16px",
-        fontSize: "14px",
-        fontWeight: 600,
-      }}
-    >
-      <span>
-        아직 완료하지 않은 대응 체크리스트가 있습니다. 마이페이지에서 확인해보세요.
-      </span>
-
-      <div
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: "8px",
-          flexShrink: 0,
-        }}
+    <aside className={styles.reminder} aria-label="체크리스트 알림">
+      <button
+        type="button"
+        className={styles.closeButton}
+        onClick={() => setIsDismissed(true)}
+        aria-label="알림 닫기"
       >
-        <a
-          href="/mypage"
-          style={{
-            padding: "8px 12px",
-            borderRadius: "999px",
-            background: "#ffffff",
-            border: "1px solid #fdba74",
-            color: "#9a3412",
-            textDecoration: "none",
-            whiteSpace: "nowrap",
-          }}
-        >
-          확인하기
-        </a>
+        ×
+      </button>
 
-        <button
-          type="button"
-          onClick={() => setIsDismissed(true)}
-          style={{
-            border: "none",
-            background: "transparent",
-            color: "#9a3412",
-            cursor: "pointer",
-            fontWeight: 700,
-            whiteSpace: "nowrap",
-            flexShrink: 0,
-          }}
-        >
-          닫기
-        </button>
+      <div className={styles.content}>
+        <span className={styles.icon} aria-hidden="true">!</span>
+        <div>
+          <strong className={styles.title}>미완료 체크리스트가 있어요</strong>
+          <p className={styles.description}>
+            마이페이지에서 남은 대응 항목을 확인해보세요.
+          </p>
+        </div>
       </div>
-    </div>
+
+      <a href="/mypage" className={styles.action}>
+        확인하기
+        <span aria-hidden="true">→</span>
+      </a>
+    </aside>
   );
 }

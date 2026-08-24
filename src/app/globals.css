@@ -874,6 +874,18 @@ textarea:focus {
   border-radius: 18px;
 }
 
+.guide-step:last-child .guide-image-placeholder {
+  display: grid;
+  place-items: center;
+  background: #f5f5ff;
+}
+
+.guide-step:last-child .guide-image-placeholder img {
+  width: 92.65%;
+  height: 90.74%;
+  object-fit: cover;
+}
+
 .terms-section {
   width: 100vw;
   margin-left: calc(50% - 50vw);

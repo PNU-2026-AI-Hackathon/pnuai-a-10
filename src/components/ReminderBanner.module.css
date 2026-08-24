@@ -1,0 +1,111 @@
+.reminder {
+  position: fixed;
+  top: 88px;
+  right: 24px;
+  z-index: 1000;
+  width: min(360px, calc(100vw - 48px));
+  padding: 18px;
+  border: 1px solid #c7d2fe;
+  border-radius: 16px;
+  background: rgba(248, 250, 255, 0.98);
+  color: #1e3a8a;
+  box-shadow: 0 12px 32px rgba(37, 99, 235, 0.16);
+  backdrop-filter: blur(8px);
+}
+
+.content {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding-right: 24px;
+}
+
+.icon {
+  display: grid;
+  flex: 0 0 28px;
+  width: 28px;
+  height: 28px;
+  place-items: center;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #2563eb, #7c3aed);
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.title {
+  display: block;
+  margin-top: 2px;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.description {
+  margin: 5px 0 0;
+  color: #475569;
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+.action {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 14px;
+  padding: 9px 12px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #2563eb, #7c3aed);
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.action:hover {
+  box-shadow: 0 8px 18px rgba(37, 99, 235, 0.22);
+  filter: brightness(1.04);
+}
+
+.action:focus-visible,
+.closeButton:focus-visible {
+  outline: 2px solid #2563eb;
+  outline-offset: 2px;
+}
+
+.closeButton {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: #475569;
+  cursor: pointer;
+  font-size: 22px;
+  line-height: 1;
+}
+
+.closeButton:hover {
+  background: #e0e7ff;
+  color: #1d4ed8;
+}
+
+@media (max-width: 640px) {
+  .reminder {
+    top: 76px;
+    right: 16px;
+    width: calc(100vw - 32px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .action {
+    transition: none;
+  }
+}
