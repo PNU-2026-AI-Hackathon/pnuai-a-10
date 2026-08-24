@@ -375,8 +375,10 @@ export default function MyPage() {
                                   }}
                                 >
                                   {item.type === "leak"
-                                    ? "유출 안내문 분석"
-                                    : "의심 문자 분석"}
+                                    ? item.company
+                                      ? `${item.company} 유출 안내문 분석`
+                                      : item.title
+                                    : item.title}
                                 </strong>
 
                                 <span
