@@ -298,24 +298,20 @@ export default function BannerPage() {
               <div className="institution-marquee-track">
                 <div className="institution-logo-set">
                   <div className="institution-logo-row">
-                    <img className="institution-netan-logo" src="/images/banner/netan-transparent.png" alt="사이버캅 NETAN" />
-                    <div className="institution-source-crop institution-pipc-logo" role="img" aria-label="개인정보보호위원회">
-                      <img src="/images/banner/institution-logos.png" alt="" />
-                    </div>
-                    <div className="institution-source-crop institution-kisa-logo" role="img" aria-label="한국인터넷진흥원 KISA">
-                      <img src="/images/banner/institution-logos.png" alt="" />
-                    </div>
+                    <img
+                      className="institution-marquee-image"
+                      src="/images/banner/institution-marquee.png"
+                      alt="사이버캅 NETAN, 개인정보보호 포털, 개인정보보호위원회, 한국인터넷진흥원 KISA"
+                    />
                   </div>
                 </div>
                 <div className="institution-logo-set" aria-hidden="true">
                   <div className="institution-logo-row">
-                    <img className="institution-netan-logo" src="/images/banner/netan-transparent.png" alt="" />
-                    <div className="institution-source-crop institution-pipc-logo">
-                      <img src="/images/banner/institution-logos.png" alt="" />
-                    </div>
-                    <div className="institution-source-crop institution-kisa-logo">
-                      <img src="/images/banner/institution-logos.png" alt="" />
-                    </div>
+                    <img
+                      className="institution-marquee-image"
+                      src="/images/banner/institution-marquee.png"
+                      alt=""
+                    />
                   </div>
                 </div>
               </div>

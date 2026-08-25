@@ -978,7 +978,7 @@ textarea:focus {
 .institution-marquee {
   width: 100%;
   max-width: 1120px;
-  margin: 48px auto 0;
+  margin: 32px auto 0;
   overflow: hidden;
   -webkit-mask-image: linear-gradient(
     to right,
@@ -1015,16 +1015,15 @@ textarea:focus {
 
 .institution-logo-row {
   width: 1080px;
-  height: 360px;
+  height: 240px;
   display: flex;
   align-items: center;
-  gap: 45px;
 }
 
-.institution-netan-logo {
+.institution-marquee-image {
   display: block;
-  width: 320px;
-  height: 320px;
+  width: 1080px;
+  height: auto;
   object-fit: contain;
 }
 
@@ -1493,7 +1492,7 @@ textarea:focus {
   }
 
   .institution-marquee {
-    margin-top: 36px;
+    margin-top: 24px;
   }
 
   .institution-logo-set {
@@ -1503,8 +1502,11 @@ textarea:focus {
 
   .institution-logo-row {
     width: 900px;
-    transform: scale(0.8333);
-    transform-origin: left center;
+    height: 200px;
+  }
+
+  .institution-marquee-image {
+    width: 900px;
   }
 
   .banner-footer {
