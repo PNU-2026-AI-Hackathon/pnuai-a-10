@@ -298,6 +298,15 @@ export const providerShortcutGroups = [
     links: [providerLinks.diorAccount],
   },
   {
+    keywords: ["카카오", "카카오톡", "Kakao", "KakaoTalk"],
+    links: [
+      providerLinks.kakaoAccount,
+      providerLinks.kakaoPasswordChange,
+      providerLinks.kakaoLoginHistory,
+      providerLinks.kakaoSafetyGuide,
+    ],
+  },
+  {
     keywords: ["SK텔레콤", "SKT", "에스케이텔레콤", "T world", "티월드"],
     links: [providerLinks.skTelecomLineReview],
   },
