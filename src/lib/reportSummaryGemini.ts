@@ -114,6 +114,9 @@ async function callGeminiForReport(
         },
       ],
       temperature: 0.1,
+      provider: {
+        zdr: true,
+      },
       response_format: {
         type: "json_object",
       },

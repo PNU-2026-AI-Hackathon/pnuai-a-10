@@ -190,6 +190,9 @@ async function callGeminiJson<T>(
         },
       ],
       temperature: 0.2,
+      provider: {
+        zdr: true,
+      },
       response_format: {
         type: "json_object",
       },
