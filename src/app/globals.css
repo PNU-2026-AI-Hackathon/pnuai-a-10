@@ -103,6 +103,9 @@ input {
 }
 
 .hero {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
   min-height: calc(100svh - 88px);
   padding: 70px 7vw 38px;
   box-sizing: border-box;
@@ -112,8 +115,29 @@ input {
   align-items: center;
 }
 
+.hero::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  width: 520px;
+  height: 520px;
+  right: 10%;
+  top: 50%;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(99, 102, 241, 0.13), rgba(99, 102, 241, 0) 68%);
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+.hero-copy,
+.hero-card {
+  position: relative;
+  z-index: 1;
+}
+
 .eyebrow {
   display: inline-flex;
+  transform: translateY(-48px);
   gap: 8px;
   align-items: center;
   padding: 8px 12px;
@@ -127,14 +151,16 @@ input {
 }
 
 .hero h1 {
-  margin: 24px 0 16px;
+  margin: 32px 0 24px;
+  transform: translateY(-40px);
   font-size: clamp(38px, 5vw, 68px);
-  line-height: 1.04;
+  line-height: 1.12;
   letter-spacing: -0.07em;
 }
 
 .hero p {
   margin: 0;
+  transform: translateY(-52px);
   color: var(--muted);
   font-size: 18px;
   line-height: 1.75;
@@ -145,7 +171,8 @@ input {
   display: flex;
   flex-wrap: wrap;
   gap: 12px;
-  margin-top: 28px;
+  margin-top: 36px;
+  transform: translateY(-40px);
 }
 
 .primary-btn,
@@ -185,12 +212,10 @@ input {
 }
 
 .hero-card {
-  background: rgba(255, 255, 255, 0.82);
-  border: 1px solid rgba(226, 232, 240, 0.9);
-  border-radius: 30px;
-  padding: 24px;
-  box-shadow: var(--shadow);
-  backdrop-filter: blur(18px);
+  background: transparent;
+  border: 0;
+  padding: 0;
+  box-shadow: none;
 }
 
 .phone-preview {
@@ -199,6 +224,8 @@ input {
   padding: 16px;
   color: #fff;
   overflow: hidden;
+  box-shadow: 0 30px 70px rgba(30, 41, 59, 0.16),
+    0 0 0 1px rgba(255, 255, 255, 0.38);
 }
 
 .phone-top {
@@ -747,6 +774,21 @@ textarea:focus {
   color: var(--text);
   font-weight: 800;
   cursor: pointer;
+}
+
+.small-btn.pdf-save-btn {
+  border-color: transparent;
+  background: var(--primary-soft);
+  color: var(--primary-dark);
+}
+
+.leak-result-action {
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.leak-result-action:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.1);
 }
 
 .mypage-login-btn {
@@ -1413,6 +1455,7 @@ textarea:focus {
 
   .card-grid {
     grid-template-columns: 1fr;
+    gap: 10px;
   }
 
   .guide-steps {
@@ -1619,19 +1662,52 @@ textarea:focus {
 
 /* 모바일에서는 라벨이 문장 위를 덜 가리도록 위치 조정 */
 @media (max-width: 680px) {
+  .check-list {
+    gap: 8px;
+  }
+
   .check-list li {
-    grid-template-columns: 38px 1fr;
-    padding-top: 46px;
+    display: block;
+    padding: 42px 12px 9px;
+    border-radius: 15px;
+    line-height: 1.4;
   }
 
   .check-list li::after {
-    top: 12px !important;
-    left: 14px;
+    top: 9px !important;
+    left: 46px;
     right: auto !important;
+    padding: 4px 8px;
+  }
+
+  .check-list .num {
+    position: absolute;
+    top: 7px;
+    left: 12px;
+    width: 28px;
+    height: 28px;
+    border-radius: 10px;
   }
 
   .check-list li span:last-child {
     padding-right: 0;
+  }
+
+  .support-shortcut-panel,
+  .reference-panel {
+    margin-top: 10px !important;
+    padding: 2px 12px !important;
+  }
+
+  .support-shortcut-panel .shortcut-row,
+  .reference-panel .reference-row {
+    gap: 10px !important;
+    padding: 10px 0 !important;
+  }
+
+  .support-shortcut-panel .shortcut-row span,
+  .reference-panel .reference-row span {
+    line-height: 1.4 !important;
   }
 }
 /* 시작 페이지와 배너 영역 보완 */
@@ -1992,6 +2068,59 @@ textarea:focus {
 
 .mypage-workspace .history-check-title {
   font-size: 16px;
+}
+
+@media (max-width: 680px) {
+  .mypage-workspace .results {
+    padding: 16px;
+  }
+
+  .mypage-workspace .info-card {
+    padding: 14px;
+  }
+
+  .mypage-workspace .history-card {
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 12px 14px !important;
+    gap: 10px !important;
+  }
+
+  .history-card-summary {
+    gap: 8px !important;
+  }
+
+  .history-card-copy {
+    line-height: 1.35 !important;
+  }
+
+  .history-card-title {
+    white-space: normal !important;
+    overflow-wrap: anywhere;
+    margin-bottom: 4px !important;
+    font-size: 16px !important;
+    line-height: 1.35;
+  }
+
+  .history-card-progress {
+    min-width: 62px !important;
+    font-size: 24px !important;
+  }
+
+  .history-card-footer {
+    gap: 8px !important;
+  }
+
+  .history-card-date {
+    white-space: normal !important;
+    font-size: 12px !important;
+    line-height: 1.35;
+  }
+
+  .history-card-footer .small-btn {
+    flex-shrink: 0;
+    padding: 8px 12px;
+  }
 }
 
 .history-risk-level[data-risk-level="높음"] {
@@ -2969,6 +3098,58 @@ textarea:focus {
   color: #94a3b8;
   text-decoration: line-through;
   text-decoration-thickness: 1.5px;
+}
+
+@media (max-width: 680px) {
+  .history-detail {
+    padding-top: 12px !important;
+    gap: 11px !important;
+  }
+
+  .history-detail-title {
+    margin-bottom: 5px !important;
+    font-size: 14px !important;
+  }
+
+  .history-detail-summary {
+    font-size: 14px;
+    line-height: 1.45 !important;
+  }
+
+  .history-detail-chips {
+    gap: 6px !important;
+  }
+
+  .history-detail-chips > span {
+    padding: 4px 8px !important;
+    font-size: 12px !important;
+  }
+
+  .history-check-list {
+    gap: 7px !important;
+  }
+
+  .history-check-item {
+    padding: 9px 11px;
+    border-radius: 10px;
+  }
+
+  .mypage-workspace .history-check-title {
+    font-size: 14px;
+    line-height: 1.35;
+  }
+
+  .history-check-button {
+    width: 18px;
+    height: 18px;
+    flex-basis: 18px;
+  }
+
+  .history-check-description {
+    padding-left: 24px !important;
+    font-size: 13px !important;
+    line-height: 1.45 !important;
+  }
 }
 
 /* Keep every visual action consistent with the pill-shaped button language. */

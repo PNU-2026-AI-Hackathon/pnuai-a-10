@@ -285,6 +285,7 @@ function renderShortcutRows(shortcuts: ShortcutItem[]) {
   return shortcuts.map((shortcut, index) => (
     <div
       key={shortcut.id}
+      className="shortcut-row"
       style={{
         display: "flex",
         alignItems: "center",
@@ -1270,7 +1271,7 @@ export default function LeakPage() {
                         <span className="icon-dot"></span> 신고·상담 기관
                       </h4>
 
-                      <div style={shortcutPanelStyle}>
+                      <div className="support-shortcut-panel" style={shortcutPanelStyle}>
                         {renderShortcutRows(supportShortcutLinks)}
                       </div>
                     </article>
@@ -1282,6 +1283,7 @@ export default function LeakPage() {
 
                       {result.sources?.length ? (
                         <div
+                          className="reference-panel"
                           style={{
                             marginTop: "14px",
                             padding: "4px 18px",
@@ -1293,6 +1295,7 @@ export default function LeakPage() {
                           {result.sources.map((source, index) => (
                             <div
                               key={source.sourceId}
+                              className="reference-row"
                               style={{
                                 display: "flex",
                                 alignItems: "center",
@@ -1366,7 +1369,7 @@ export default function LeakPage() {
                       >
                         <button
                         type="button"
-                        className="small-btn"
+                        className="small-btn leak-result-action"
                         onClick={copyFamilyMessage}
                         >
                           안내문 복사
@@ -1374,17 +1377,17 @@ export default function LeakPage() {
 
                         <button
                         type="button"
-                        className="small-btn"
+                        className="small-btn leak-result-action"
                         onClick={shareLeakCare}
                         >
                           공유하기
                         </button>
                         <button
                           type="button"
-                          className="small-btn"
+                          className="small-btn pdf-save-btn leak-result-action"
                           onClick={saveAsPdf}
                         >
-                          PDF 저장
+                          분석 결과 PDF 저장
                         </button>
                       </div>
                     </article>

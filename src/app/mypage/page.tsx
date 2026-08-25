@@ -348,6 +348,7 @@ export default function MyPage() {
                               }}
                             >
                               <div
+                              className="history-card-summary"
                               style={{
                                 display: "flex",
                                 alignItems: "center",
@@ -355,6 +356,7 @@ export default function MyPage() {
                               }}
                               >
                               <span
+                                className="history-card-copy"
                                 style={{
                                   flex: 1,
                                   minWidth: 0,
@@ -365,6 +367,7 @@ export default function MyPage() {
                                 }}
                               >
                                 <strong
+                                  className="history-card-title"
                                   style={{
                                     display: "block",
                                     whiteSpace: "nowrap",
@@ -400,6 +403,7 @@ export default function MyPage() {
 
                               {Array.isArray(item.checklist) && item.checklist.length > 0 && (
                                 <span
+                                  className="history-card-progress"
                                   style={{
                                     minWidth: "90px",
                                     paddingRight: 0,
@@ -426,6 +430,7 @@ export default function MyPage() {
                               )}
                               </div>
                               <div
+                                className="history-card-footer"
                                 style={{
                                   display: "flex",
                                   alignItems: "flex-end",
@@ -434,6 +439,7 @@ export default function MyPage() {
                                 }}
                               >
                                 <span
+                                  className="history-card-date"
                                   style={{
                                     whiteSpace: "nowrap",
                                     fontSize: "14px",
@@ -461,6 +467,7 @@ export default function MyPage() {
                               {expandedHistoryId === item.id && (
                                 <div
                                   id={`history-detail-${item.id}`}
+                                  className="history-detail"
                                   style={{
                                     width: "100%",
                                     borderTop: "1px solid #cbd5e1",
@@ -471,8 +478,9 @@ export default function MyPage() {
                                   }}
                                 >
                                   {item.resultSummary && (
-                                    <section>
+                                    <section className="history-detail-section">
                                       <h5
+                                        className="history-detail-title"
                                         style={{
                                           margin: "0 0 8px",
                                           fontSize: "15px",
@@ -483,6 +491,7 @@ export default function MyPage() {
                                       </h5>
 
                                       <p
+                                        className="history-detail-summary"
                                         style={{
                                           margin: 0,
                                           color: "#475569",
@@ -497,8 +506,9 @@ export default function MyPage() {
                                   )}
 
                                   {item.leakedItems && item.leakedItems.length > 0 && (
-                                    <section>
+                                    <section className="history-detail-section">
                                       <h5
+                                        className="history-detail-title"
                                         style={{
                                           margin: "0 0 8px",
                                           fontSize: "15px",
@@ -509,6 +519,7 @@ export default function MyPage() {
                                       </h5>
 
                                       <div
+                                        className="history-detail-chips"
                                         style={{
                                           display: "flex",
                                           flexWrap: "wrap",
@@ -535,8 +546,9 @@ export default function MyPage() {
                                   )}
 
                                   {item.riskTypes && item.riskTypes.length > 0 && (
-                                    <section>
+                                    <section className="history-detail-section">
                                       <h5
+                                        className="history-detail-title"
                                         style={{
                                           margin: "0 0 8px",
                                           fontSize: "15px",
@@ -547,6 +559,7 @@ export default function MyPage() {
                                       </h5>
 
                                       <div
+                                        className="history-detail-chips"
                                         style={{
                                           display: "flex",
                                           flexWrap: "wrap",
@@ -572,8 +585,9 @@ export default function MyPage() {
                                     </section>
                                   )}
                                   {Array.isArray(item.checklist) && item.checklist.length > 0 && (
-                                    <section>
+                                    <section className="history-detail-section">
                                       <h5
+                                        className="history-detail-title"
                                         style={{
                                           margin: "0 0 8px",
                                           fontSize: "15px",
@@ -584,6 +598,7 @@ export default function MyPage() {
                                       </h5>
 
                                       <div
+                                        className="history-check-list"
                                         style={{
                                           display: "flex",
                                           flexDirection: "column",
@@ -647,6 +662,7 @@ export default function MyPage() {
 
                                               {itemData.description && (
                                                 <p
+                                                  className="history-check-description"
                                                   style={{
                                                     margin: 0,
                                                     paddingLeft: "26px",

@@ -117,7 +117,7 @@ export default function BannerPage() {
 
       <main>
         <section className="hero">
-          <div>
+          <div className="hero-copy">
             <span className="eyebrow">
               개인정보 유출 후, 무엇부터 해야 할지 알려주는 AI 가이드
             </span>
@@ -153,6 +153,7 @@ export default function BannerPage() {
                 의심 문자 분석하기
               </a>
             </div>
+
           </div>
 
           <div className="hero-card" aria-label="서비스 미리보기">
@@ -324,7 +325,7 @@ export default function BannerPage() {
               <div className="banner-footer-brand">
                 <strong>Leakcare</strong>
                 <p>
-                  (주) 창의융합 AI해커톤&nbsp; | &nbsp;코드타설단&nbsp; | &nbsp;팀장
+                  창의융합 AI해커톤&nbsp; | &nbsp;코드타설단&nbsp; | &nbsp;팀장
                   이수빈&nbsp; | &nbsp;Email: subin0515@pusan.ac.kr
                 </p>
                 <div className="banner-footer-social" aria-label="소셜 미디어">

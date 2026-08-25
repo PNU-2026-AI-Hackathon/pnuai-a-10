@@ -169,7 +169,7 @@ export default function ReportSummaryPanel({
       <div className="action-buttons" style={{ marginTop: "14px" }}>
         <button
           type="button"
-          className="small-btn"
+          className="small-btn leak-result-action"
           onClick={() => setIsOpen((current) => !current)}
         >
           신고·상담용 요약문 만들기
