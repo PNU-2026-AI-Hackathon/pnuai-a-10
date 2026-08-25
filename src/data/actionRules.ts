@@ -113,6 +113,36 @@ export const actionRules: Record<string, ChecklistItem[]> = {
     },
   ],
 
+  CI: [
+    {
+      id: "ci-identity-verification-warning",
+      priority: "1주 이내 확인",
+      title: "본인확인 사칭 연락을 공식 채널로 확인하세요.",
+      description:
+        "CI는 여러 서비스에서 같은 사람을 연결하는 데 쓰일 수 있으므로 본인확인, 계정 확인, 보상 안내를 사칭한 연락에 주의해야 합니다.",
+    },
+  ],
+
+  DI: [
+    {
+      id: "di-account-identification-warning",
+      priority: "필요 시 관리",
+      title: "계정 확인을 요구하는 연락을 주의하세요.",
+      description:
+        "DI는 서비스 내 사용자 식별을 보강할 수 있으므로 계정 확인이나 본인확인을 요구하는 연락은 공식 채널에서 직접 확인하세요.",
+    },
+  ],
+
+  IMEI: [
+    {
+      id: "imei-telecom-device-warning",
+      priority: "1주 이내 확인",
+      title: "통신사 사칭 단말 안내를 주의하세요.",
+      description:
+        "IMEI는 휴대전화 단말 식별정보이므로 단말 등록, 회선 확인, 본인인증을 사칭한 문자나 전화에 주의하세요.",
+    },
+  ],
+
   통신인증정보: [
     {
       id: "telecom-auth-protection-check",
@@ -141,23 +171,41 @@ export const actionRules: Record<string, ChecklistItem[]> = {
     },
   ],
 
-  결제정보: [
+  결제내역: [
     {
       id: "payment-history-check",
       priority: "즉시 조치",
-      title: "최근 결제 내역을 확인하세요.",
+      title: "결제 관련 사칭 연락을 주의하세요.",
       description:
-        "결제정보가 유출된 경우 승인하지 않은 결제가 있는지 카드사나 결제 앱에서 확인해야 합니다.",
+        "결제내역이 유출된 경우 실제 결제 정보를 이용한 환불, 추가 결제, 보상 안내 사칭 연락이 올 수 있습니다.",
     },
   ],
 
-  카드정보: [
+  계좌번호: [
+    {
+      id: "bank-account-scam-warning",
+      priority: "즉시 조치",
+      title: "금융기관이나 송금 사칭 연락을 주의하세요.",
+      description:
+        "계좌번호가 유출되면 금융기관 확인, 환불, 송금을 사칭한 연락에 악용될 수 있으므로 공식 채널에서 직접 확인하세요.",
+    },
+    {
+      id: "bank-account-report-if-needed",
+      priority: "필요 시 관리",
+      title: "금전 피해가 의심되면 신고·상담하세요.",
+      description:
+        "계좌번호와 관련해 의심스러운 송금 요청이나 금전 피해가 있었다면 관련 기관에 상담 또는 신고하세요.",
+      link: providerLinks.policeCyber,
+    },
+  ],
+
+  카드번호: [
     {
       id: "card-history-check",
       priority: "즉시 조치",
       title: "카드 승인 내역을 확인하세요.",
       description:
-        "카드정보 유출 가능성이 있으면 승인하지 않은 결제 내역이 있는지 확인하고 필요 시 카드사에 문의하세요.",
+        "카드번호 유출 가능성이 있으면 승인하지 않은 결제 내역이 있는지 확인하고 필요 시 카드사에 문의하세요.",
     },
   ],
 
@@ -178,6 +226,60 @@ export const actionRules: Record<string, ChecklistItem[]> = {
       title: "명의도용 가능성을 확인하세요.",
       description:
         "주민등록번호가 유출되면 명의도용, 불법 가입, 금융 피해로 이어질 수 있으므로 즉시 확인이 필요합니다.",
+      link: providerLinks.privacyReport,
+    },
+  ],
+
+  여권번호: [
+    {
+      id: "passport-identity-verification-warning",
+      priority: "즉시 조치",
+      title: "출처가 불분명한 신분 확인 요청에 응하지 마세요.",
+      description:
+        "여권번호가 유출되면 신분 확인이나 본인확인을 사칭한 연락에 악용될 수 있으므로 링크 접속이나 추가 개인정보 제공 전에 공식 채널에서 직접 확인하세요.",
+    },
+    {
+      id: "passport-privacy-report-if-needed",
+      priority: "필요 시 관리",
+      title: "신분 사칭이 의심되면 상담하세요.",
+      description:
+        "여권번호를 이용한 신분 사칭이나 개인정보 침해가 의심되면 관련 기관에 상담하세요.",
+      link: providerLinks.privacyReport,
+    },
+  ],
+
+  운전면허번호: [
+    {
+      id: "driver-license-identity-verification-warning",
+      priority: "즉시 조치",
+      title: "출처가 불분명한 본인확인 요청에 응하지 마세요.",
+      description:
+        "운전면허번호가 유출되면 신분 확인이나 본인확인을 사칭한 연락에 악용될 수 있으므로 추가 정보 제공 전에 공식 채널에서 직접 확인하세요.",
+    },
+    {
+      id: "driver-license-privacy-report-if-needed",
+      priority: "필요 시 관리",
+      title: "신분 사칭이 의심되면 상담하세요.",
+      description:
+        "운전면허번호를 이용한 신분 사칭이나 개인정보 침해가 의심되면 관련 기관에 상담하세요.",
+      link: providerLinks.privacyReport,
+    },
+  ],
+
+  외국인등록번호: [
+    {
+      id: "alien-registration-identity-verification-warning",
+      priority: "즉시 조치",
+      title: "명의·본인확인을 요구하는 의심 연락에 응하지 마세요.",
+      description:
+        "외국인등록번호가 유출되면 명의도용이나 본인확인 사칭에 악용될 수 있으므로 추가 개인정보 제공이나 링크 접속 전에 공식 채널에서 직접 확인하세요.",
+    },
+    {
+      id: "alien-registration-privacy-report-if-needed",
+      priority: "필요 시 관리",
+      title: "명의도용이 의심되면 상담하세요.",
+      description:
+        "외국인등록번호를 이용한 명의도용이나 개인정보 침해가 의심되면 관련 기관에 상담하세요.",
       link: providerLinks.privacyReport,
     },
   ],
