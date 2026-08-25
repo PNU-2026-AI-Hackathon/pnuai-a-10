@@ -1,0 +1,335 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>개인정보 유출 후 가장 어려운 점</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      min-height: 100vh;
+      margin: 0;
+      display: grid;
+      place-items: center;
+      background: #ffffff;
+      color: #0b1431;
+      font-family: "Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", Arial, sans-serif;
+    }
+
+    .survey-card {
+      width: min(1060px, calc(100vw - 40px));
+      min-height: auto;
+      padding: 0;
+      border: 0;
+      border-radius: 0;
+      background: #ffffff;
+      position: relative;
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 28px;
+      margin-bottom: 30px;
+    }
+
+    .title-badge {
+      width: 455px;
+      height: 48px;
+      display: grid;
+      place-items: center;
+      border-radius: 9px;
+      color: #ffffff;
+      background: linear-gradient(180deg, #062171 0%, #071a58 100%);
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.16);
+      font-size: 28px;
+      font-weight: 800;
+      letter-spacing: 0;
+    }
+
+    .subtitle {
+      color: #5e6576;
+      font-size: 22px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .content {
+      display: grid;
+      grid-template-columns: 46% 54%;
+      align-items: center;
+      gap: 18px;
+    }
+
+    .donut-wrap {
+      display: grid;
+      place-items: center;
+      padding-left: 8px;
+    }
+
+    .donut {
+      width: 400px;
+      aspect-ratio: 1;
+      border-radius: 50%;
+      position: relative;
+      background:
+        conic-gradient(
+          from 0deg,
+          #051b68 0deg 111.6deg,
+          #0847bc 111.6deg 237.6deg,
+          #4e86ea 237.6deg 298.8deg,
+          #9fc0f4 298.8deg 345.6deg,
+          #bfc5d3 345.6deg 360deg
+        );
+    }
+
+    .donut::before {
+      content: "";
+      position: absolute;
+      inset: 118px;
+      border-radius: 50%;
+      background: #ffffff;
+      z-index: 2;
+    }
+
+    .slice-line {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 2px;
+      height: 200px;
+      transform-origin: top center;
+      background: rgba(255, 255, 255, 0.84);
+      z-index: 1;
+    }
+
+    .slice-line:nth-child(1) {
+      transform: rotate(0deg);
+    }
+
+    .slice-line:nth-child(2) {
+      transform: rotate(111.6deg);
+    }
+
+    .slice-line:nth-child(3) {
+      transform: rotate(237.6deg);
+    }
+
+    .slice-line:nth-child(4) {
+      transform: rotate(298.8deg);
+    }
+
+    .slice-line:nth-child(5) {
+      transform: rotate(345.6deg);
+    }
+
+    .percent {
+      position: absolute;
+      z-index: 3;
+      color: #ffffff;
+      font-size: 31px;
+      font-weight: 800;
+      line-height: 1;
+    }
+
+    .p72 {
+      right: 52px;
+      top: 101px;
+    }
+
+    .p66 {
+      right: 82px;
+      bottom: 65px;
+    }
+
+    .p58 {
+      left: 66px;
+      bottom: 82px;
+    }
+
+    .p38 {
+      left: 34px;
+      top: 150px;
+    }
+
+    .p32 {
+      left: 112px;
+      top: 58px;
+    }
+
+    .center-icon {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 105px;
+      height: 105px;
+      transform: translate(-50%, -50%);
+      z-index: 4;
+      color: #06155d;
+    }
+
+    .ranking {
+      display: grid;
+      gap: 36px;
+      padding: 4px 2px 0 0;
+    }
+
+    .item {
+      display: grid;
+      grid-template-columns: 44px 1fr 132px;
+      align-items: center;
+      gap: 24px;
+      font-size: 26px;
+      font-weight: 800;
+      line-height: 1.1;
+    }
+
+    .rank {
+      width: 40px;
+      height: 40px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      color: #ffffff;
+      font-size: 22px;
+      font-weight: 900;
+    }
+
+    .rank-1 {
+      background: #061f70;
+    }
+
+    .rank-2 {
+      background: #0758c7;
+    }
+
+    .rank-3 {
+      background: #1970d8;
+    }
+
+    .rank-4 {
+      background: #82afea;
+    }
+
+    .rank-5 {
+      background: #c1c8d7;
+    }
+
+    .value {
+      color: #111833;
+      text-align: right;
+      white-space: nowrap;
+    }
+
+    @media (max-width: 860px) {
+      .survey-card {
+        padding: 0;
+      }
+
+      .header {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .title-badge {
+        width: 100%;
+        height: auto;
+        min-height: 48px;
+        padding: 8px 12px;
+        font-size: 22px;
+        text-align: center;
+      }
+
+      .subtitle {
+        font-size: 17px;
+      }
+
+      .content {
+        grid-template-columns: 1fr;
+      }
+
+      .donut {
+        width: min(400px, 88vw);
+      }
+
+      .ranking {
+        gap: 20px;
+      }
+
+      .item {
+        grid-template-columns: 38px 1fr auto;
+        gap: 12px;
+        font-size: 18px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <section class="survey-card" aria-labelledby="survey-title">
+    <header class="header">
+      <h1 class="title-badge" id="survey-title">개인정보 유출 후 가장 어려운 점</h1>
+      <div class="subtitle">복수응답 (응답자: 100명)</div>
+    </header>
+
+    <div class="content">
+      <div class="donut-wrap" aria-label="응답 비율 도넛 차트">
+        <div class="donut">
+          <span class="slice-line"></span>
+          <span class="slice-line"></span>
+          <span class="slice-line"></span>
+          <span class="slice-line"></span>
+          <span class="slice-line"></span>
+
+          <span class="percent p72">72%</span>
+          <span class="percent p66">66%</span>
+          <span class="percent p58">58%</span>
+          <span class="percent p38">38%</span>
+          <span class="percent p32">32%</span>
+
+          <svg class="center-icon" viewBox="0 0 120 120" aria-hidden="true">
+            <g fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="38" cy="57" r="13" />
+              <path d="M16 101c0-17 11-29 27-29s27 12 27 29" />
+              <path d="M56 27c7-9 21-12 33-6 15 8 19 27 7 39-8 8-20 11-31 8l-17 12 5-20c-7-9-6-22 3-33z" />
+              <path d="M75 38c7-6 18 1 12 10-2 3-6 5-9 8" />
+              <path d="M77 65h.1" />
+            </g>
+          </svg>
+        </div>
+      </div>
+
+      <div class="ranking" aria-label="응답 순위">
+        <div class="item">
+          <span class="rank rank-1">1</span>
+          <span>무엇부터 해야 할지 모름</span>
+          <span class="value">72명 (72%)</span>
+        </div>
+        <div class="item">
+          <span class="rank rank-2">2</span>
+          <span>유출 정보가 이해하기 어려움</span>
+          <span class="value">66명 (66%)</span>
+        </div>
+        <div class="item">
+          <span class="rank rank-3">3</span>
+          <span>위험도를 모름</span>
+          <span class="value">58명 (58%)</span>
+        </div>
+        <div class="item">
+          <span class="rank rank-4">4</span>
+          <span>대응 방법이 복잡함</span>
+          <span class="value">38명 (38%)</span>
+        </div>
+        <div class="item">
+          <span class="rank rank-5">5</span>
+          <span>믿을 만한 정보 찾기 어려움</span>
+          <span class="value">32명 (32%)</span>
+        </div>
+      </div>
+    </div>
+  </section>
+</body>
+</html>
