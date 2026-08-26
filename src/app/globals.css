@@ -1381,18 +1381,40 @@ textarea:focus {
     padding-bottom: 54px;
   }
 
+  .hero .hero-copy {
+    transform: translateY(10px);
+  }
+
+  .hero .eyebrow {
+    transform: translate(-6px, -16px);
+  }
+
+  .hero h1 {
+    transform: translateY(-22px);
+  }
+
+  .hero p {
+    transform: translateY(-34px);
+  }
+
   .hero .hero-actions {
     width: 100%;
     flex-wrap: nowrap;
     gap: 8px;
+    margin-top: 20px;
+    transform: translateY(-38px);
   }
 
   .hero .hero-actions a {
     min-width: 0;
     flex: 1 1 0;
-    padding: 12px 8px;
-    font-size: 13px;
+    padding: 10px 7px;
+    font-size: 12.5px;
     white-space: nowrap;
+  }
+
+  .hero .hero-card {
+    transform: translateY(-12px);
   }
 
   .stats {
@@ -1438,7 +1460,7 @@ textarea:focus {
 
   .feature-tab strong {
     margin-bottom: 8px;
-    font-size: 17px;
+    font-size: 20px;
     line-height: 1.4;
   }
 
@@ -1447,7 +1469,7 @@ textarea:focus {
     max-width: 300px;
     margin: 0 auto;
     padding: 0 14px;
-    font-size: 14px;
+    font-size: 15.5px;
     line-height: 1.65;
     word-break: keep-all;
   }
