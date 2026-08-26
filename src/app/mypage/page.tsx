@@ -336,8 +336,8 @@ export default function MyPage() {
                                 background:
                                   "linear-gradient(135deg, #EEF2FF 0%, #EDE9FE 100%)",
                                 border: "1px solid #ddd6fe",
-                                width: "calc(100% - 16px)",
-                                margin: "0 auto",
+                                width: "100%",
+                                margin: 0,
                                 boxSizing: "border-box",
                                 padding: "14px 18px",
                                 minHeight: "auto",

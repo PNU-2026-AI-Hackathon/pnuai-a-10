@@ -2073,6 +2073,23 @@ textarea:focus {
 }
 
 @media (max-width: 680px) {
+  .mypage-workspace,
+  .mypage-workspace .app-shell,
+  .mypage-workspace .panel,
+  .mypage-workspace .results,
+  .mypage-workspace .card-grid,
+  .mypage-workspace .info-card,
+  .mypage-workspace .check-list {
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .mypage-workspace .panel,
+  .mypage-workspace .info-card {
+    overflow: hidden;
+  }
+
   .mypage-workspace .results {
     padding: 16px;
   }
@@ -2083,12 +2100,16 @@ textarea:focus {
 
   .mypage-workspace .history-card {
     width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
     margin: 0 !important;
     padding: 12px 14px !important;
     gap: 10px !important;
   }
 
   .history-card-summary {
+    width: 100%;
+    min-width: 0;
     gap: 8px !important;
   }
 
