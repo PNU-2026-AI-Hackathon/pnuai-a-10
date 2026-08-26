@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import Navigation from "../../components/Navigation";
 
 const featureSlides = [
@@ -135,23 +136,13 @@ export default function BannerPage() {
             </p>
 
             <div className="hero-actions">
-              <a
-                className="primary-btn"
-                href="/leak"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
+              <Link className="primary-btn" href="/leak">
                 유출 안내문 분석하기
-              </a>
+              </Link>
 
-              <a
-                className="secondary-btn"
-                href="/sms"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
+              <Link className="secondary-btn" href="/sms">
                 의심 문자 분석하기
-              </a>
+              </Link>
             </div>
 
           </div>
