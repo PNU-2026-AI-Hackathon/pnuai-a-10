@@ -7,7 +7,25 @@ type PreparedImage = {
 
 const MAX_IMAGE_EDGE = 3000;
 const UPSCALE_TARGET_WIDTH = 1800;
+const MOBILE_MAX_IMAGE_EDGE = 1600;
+const MOBILE_UPSCALE_TARGET_WIDTH = 1200;
 const CONTRAST = 1.16;
+
+function isMobileDevice(): boolean {
+  if (typeof navigator === "undefined") {
+    return false;
+  }
+
+  const userAgent = navigator.userAgent;
+  const isMobileUserAgent =
+    /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+      userAgent
+    );
+  const isIPadOs =
+    /Macintosh/i.test(userAgent) && navigator.maxTouchPoints > 1;
+
+  return isMobileUserAgent || isIPadOs;
+}
 
 function loadImage(url: string): Promise<HTMLImageElement> {
   return new Promise((resolve, reject) => {
@@ -31,14 +49,18 @@ function canvasToBlob(canvas: HTMLCanvasElement): Promise<Blob> {
   });
 }
 
-async function prepareImage(sourceUrl: string): Promise<PreparedImage> {
+async function prepareImage(
+  sourceUrl: string,
+  maxImageEdge = MAX_IMAGE_EDGE,
+  upscaleTargetWidth = UPSCALE_TARGET_WIDTH
+): Promise<PreparedImage> {
   const image = await loadImage(sourceUrl);
   const longestEdge = Math.max(image.naturalWidth, image.naturalHeight);
   const desiredScale =
-    image.naturalWidth < UPSCALE_TARGET_WIDTH
-      ? Math.min(2, UPSCALE_TARGET_WIDTH / image.naturalWidth)
+    image.naturalWidth < upscaleTargetWidth
+      ? Math.min(2, upscaleTargetWidth / image.naturalWidth)
       : 1;
-  const scale = Math.min(desiredScale, MAX_IMAGE_EDGE / longestEdge);
+  const scale = Math.min(desiredScale, maxImageEdge / longestEdge);
 
   const canvas = document.createElement("canvas");
   canvas.width = Math.max(1, Math.round(image.naturalWidth * scale));
@@ -97,6 +119,27 @@ export async function extractTextFromImage(file: File): Promise<string> {
   let preparedImage: PreparedImage | null = null;
 
   try {
+    if (isMobileDevice()) {
+      try {
+        preparedImage = await prepareImage(
+          sourceUrl,
+          MOBILE_MAX_IMAGE_EDGE,
+          MOBILE_UPSCALE_TARGET_WIDTH
+        );
+        const mobileResult = await worker.recognize(preparedImage.url);
+
+        return normalizeOcrText(mobileResult.data.text);
+      } catch (mobilePreprocessingError) {
+        console.warn(
+          "모바일 OCR 전처리에 실패해 원본 이미지를 인식합니다.",
+          mobilePreprocessingError
+        );
+        const fallbackResult = await worker.recognize(sourceUrl);
+
+        return normalizeOcrText(fallbackResult.data.text);
+      }
+    }
+
     const originalResult = await worker.recognize(sourceUrl);
 
     try {
