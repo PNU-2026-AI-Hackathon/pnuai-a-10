@@ -517,7 +517,7 @@ AI가 생성한 코드는 그대로 반영하지 않고 팀원이 기존 타입�
 
 LeakCare는 별도의 프로그램 설치 없이 PC 또는 모바일 웹 브라우저에서 이용할 수 있는 웹서비스이다. 사용자는 아래 배포 링크로 접속하여 개인정보 유출 안내문 및 의심 문자 분석 기능을 바로 사용할 수 있다.
 
-> **임시 배포 링크:** [LeakCare 바로가기]( https://leakcare.vercel.app)
+> [LeakCare 바로가기]( https://leakcare.vercel.app)
 
 ---
 
@@ -525,7 +525,7 @@ LeakCare는 별도의 프로그램 설치 없이 PC 또는 모바일 웹 브라�
 
 아래 링크에서 LeakCare의 주요 기능과 전체 서비스 이용 과정을 확인할 수 있다.
 
-**> [LeakCare 소개 및 시연 영상](https://youtu.be/AjiW2Q2yzAI?si=4rmRj23fGEVVFHG0)**
+> [LeakCare 소개 및 시연 영상](https://youtu.be/AjiW2Q2yzAI?si=4rmRj23fGEVVFHG0)
 
 ---
 
@@ -565,10 +565,10 @@ LeakCare는 별도의 프로그램 설치 없이 PC 또는 모바일 웹 브라�
 </tr>
 </table>
 
-- 이수빈: PM / 백엔드·AI / Infra
-- 김재은: 프론트엔드 / UI·UX
-- 강경민: 기획 / UX Research
-- 류태우: 데이터 시나리오 / QA
+- 이수빈: PM,Backend Developer,AI,Infra,QA
+- 김재은: Frontend Developer,UI/UX Designer
+- 강경민: UI/UX · Visual Design,Research
+- 류태우: Research,QA
 
 ---
 
