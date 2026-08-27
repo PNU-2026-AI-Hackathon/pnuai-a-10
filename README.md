@@ -567,8 +567,9 @@ LeakCare는 별도의 프로그램 설치 없이 PC 또는 모바일 웹 브라�
 
 - 이수빈: PM,Backend Developer,AI,Infra,QA
 - 김재은: Frontend Developer,UI/UX Designer
-- 강경민: UI/UX · Visual Design,Research
-- 류태우: Research,QA
+- 강경민: Research,QA
+- 류태우: UI/UX · Visual Design,Research
+
 
 ---
 
