@@ -262,7 +262,7 @@ flowchart LR
 | 프론트엔드 | Next.js, React | 사용자 화면과 반응형 인터페이스 구현 |
 | 백엔드·API | Next.js Route Handlers | AI 분석, 요약문 생성 및 분석 이력 API 구현 |
 | 개발 언어 | TypeScript | 프론트엔드와 백엔드 코드 작성 |
-| 생성형 AI | OpenRouter API, Google Gemini 2.5 Flash | 유출 안내문 및 의심 문자 분석, 설명문과 요약문 생성 |
+| 생성형 AI | OpenRouter API, Google Gemini 3.7 Flash | 유출 안내문 및 의심 문자 분석, 설명문과 요약문 생성 |
 | 이미지 문자 인식 | Tesseract.js | 안내문과 문자 이미지에서 한국어·영어 텍스트 추출 |
 | 외부 정보 검색 | 네이버 뉴스 검색 API | 관련 개인정보 유출 기사 검색 |
 | 데이터베이스·인증 | Supabase, Google·Kakao OAuth | 사용자 로그인과 분석 이력 저장·관리 |
@@ -461,7 +461,7 @@ LeakCare/
 
 
 ### 3.4 AI 도구 활용
-#### 제품 내 AI (OpenRouter · Gemini 2.5 Flash)
+#### 제품 내 AI (OpenRouter · Gemini 3.7 Flash)
 
 - **개인정보 유출 안내문 분석:** 사용자가 입력한 문자·이메일·공지문에서 기업명, 서비스명, 유출 항목과 예상 위험 유형을 구조화된 JSON 형식으로 추출
 - **관련 사고 검색 및 분석 보조:** 추출한 기업명을 기반으로 네이버 뉴스 검색 API에서 관련 기사를 조회하고, 검색 결과를 참고 자료로 활용해 분석 근거와 설명 생성
