@@ -4,7 +4,10 @@ import type {
 } from "../types/analysis";
 import type { NaverNewsResult } from "./googleSearch";
 import { providerLinks } from "../data/providerLinks";
-import { calculateRiskLevel } from "../data/riskCriteria";
+import {
+  calculateRiskLevel,
+  normalizeRiskItem,
+} from "../data/riskCriteria";
 
 export type ExtractedKeyInfo = {
   company: string;
@@ -75,6 +78,12 @@ function normalizeRiskLevel(value: unknown): RiskLevel {
 }
 
 function normalizeLeakedItem(item: string): string {
+  const riskItem = normalizeRiskItem(item);
+
+  if (riskItem) {
+    return riskItem;
+  }
+
   const normalized = item.replace(/\s/g, "");
 
   if (normalized === "가입자식별번호") {
@@ -120,7 +129,9 @@ function normalizeLeakedItem(item: string): string {
     주민등록: "주민등록번호",
   };
 
-  return map[normalized] ?? item.trim();
+  const mappedItem = map[normalized] ?? item.trim();
+
+  return normalizeRiskItem(mappedItem) ?? mappedItem;
 }
 
 function uniqueStringArray(value: unknown): string[] {
@@ -234,26 +245,31 @@ export async function extractKeyInfo(
 {
   "company": "기업명 또는 알 수 없음",
   "service": "서비스명 또는 빈 문자열",
-  "leakedItems": ["이름", "전화번호", "이메일", "주소", "주문내역", "계정정보", "비밀번호", "결제정보", "카드정보", "계좌번호", "생년월일", "주민등록번호"],
+  "leakedItems": ["이름", "생년월일", "이메일", "주소", "주문내역", "전화번호", "계정정보", "CI", "DI", "통신가입자식별정보", "결제내역", "계좌번호", "카드번호", "비밀번호", "IMEI", "통신인증정보", "주민등록번호", "여권번호", "운전면허번호", "외국인등록번호"],
   "riskTypes": ["스미싱", "피싱", "택배 사칭", "계정 탈취", "명의도용", "통신사 사칭", "본인인증 사칭"],
   "riskLevel": "낮음" | "보통" | "높음",
   "reason": "위험도 판단 이유 한두 문장"
 }
 
 규칙:
-- leakedItems에 적힌 항목 목록은 예시이며 제한된 enum이 아니다.
-- 원문에 구체적으로 명시된 개인정보 항목은 가능한 한 원문의 표현을 유지해라.
-- 처음 보는 개인정보를 임의로 "계정정보", "결제정보" 같은 기존 대표 항목으로 일반화하지 마라.
-- 예: 가입자 식별번호(IMSI)는 "가입자 식별번호(IMSI)", 유심 인증키는 "유심 인증키", 가입자 전화번호는 "가입자 전화번호"로 유지해라.
-- 실제 원문에 단순히 "계정정보"라고만 적혀 있다면 "계정정보"를 사용할 수 있다.
+- leakedItems에는 가능한 한 위 대표 명칭만 사용해라.
+- 원문 표현이 password, 패스워드, 로그인 비밀번호, 계정 로그인 패스워드라면 "비밀번호"로 반환해라.
+- 원문 표현이 email, e-mail, 이메일 주소, 메일, 전자우편이라면 "이메일"로 반환해라.
+- 원문 표현이 phone, mobile, 휴대폰 번호, 휴대전화 번호라면 "전화번호"로 반환해라.
+- 원문 표현이 user ID, 로그인 ID, 아이디, 계정 ID라면 "계정정보"로 반환해라.
+- 원문 표현이 order information, order history, 구매정보, 주문 상세 정보라면 "주문내역"으로 반환해라.
+- 원문 표현이 bank account number, 계좌 정보라면 "계좌번호"로 반환해라. 단, account 단독 표현은 사용자 계정일 수 있으므로 계좌번호로 단정하지 마라.
+- 원문 표현이 card number, credit card number, 신용카드번호라면 "카드번호"로 반환해라.
+- 원문 표현이 RRN, 주민번호라면 "주민등록번호"로 반환해라.
+- 대표 명칭으로 안전하게 대응되는 항목만 통일하고, 의미가 불명확한 항목은 임의로 추정하지 마라.
 - 유출 항목은 입력문에 명시되거나 명확한 근거가 있을 때만 넣어라.
 - 입력문에 없는 개인정보를 유출 항목에 임의로 추가하지 마라.
 - 확실하지 않은 항목은 제외해라.
 - 피해가 발생했다고 명시되지 않았다면 피해가 이미 발생했다고 단정하지 마라.
-- 카드번호가 실제로 유출된 경우에만 "카드정보"를 넣어라.
+- 카드번호가 실제로 유출된 경우에만 "카드번호"를 넣어라.
 - 은행 계좌번호가 실제로 유출된 경우에만 "계좌번호"를 넣어라.
-- 결제일시, 결제금액, 결제수단 종류가 유출된 경우 "결제정보"를 넣어라.
-- 결제정보가 유출되었다는 이유만으로 카드번호나 계좌번호가 유출되었다고 추정하지 마라.
+- 결제일시, 결제금액, 결제수단 종류가 유출된 경우 "결제내역"을 넣어라.
+- 결제내역이 유출되었다는 이유만으로 카드번호나 계좌번호가 유출되었다고 추정하지 마라.
 - riskLevel은 반드시 "낮음", "보통", "높음" 중 하나만 사용해라.
 - company를 모르면 "알 수 없음"으로 써라.
 

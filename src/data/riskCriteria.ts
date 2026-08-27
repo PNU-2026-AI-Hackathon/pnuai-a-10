@@ -219,50 +219,105 @@ const RISK_ITEM_ALIASES: Record<string, RiskItemKey> = {
   이름: "이름",
   성명: "이름",
   실명: "이름",
+  본명: "이름",
+  회원명: "이름",
+  고객명: "이름",
   입력한이름: "이름",
+  name: "이름",
+  fullname: "이름",
+  customername: "이름",
 
   생년월일: "생년월일",
 
   이메일: "이메일",
   이메일주소: "이메일",
+  메일: "이메일",
+  메일주소: "이메일",
+  전자우편: "이메일",
+  전자우편주소: "이메일",
+  email: "이메일",
+  "e-mail": "이메일",
+  emailaddress: "이메일",
+  "e-mailaddress": "이메일",
 
   주소: "주소",
   거주지: "주소",
+  거주주소: "주소",
   배송지: "주소",
+  배송주소: "주소",
+  배송지주소: "주소",
   본인주소: "주소",
+  address: "주소",
+  homeaddress: "주소",
+  shippingaddress: "주소",
 
   주문내역: "주문내역",
   주문정보: "주문내역",
+  주문상세정보: "주문내역",
+  상품주문정보: "주문내역",
+  배송주문정보: "주문내역",
+  구매정보: "주문내역",
   구매내역: "주문내역",
+  구매상세정보: "주문내역",
+  상품구매정보: "주문내역",
+  orderinformation: "주문내역",
+  orderhistory: "주문내역",
+  purchaseinformation: "주문내역",
+  purchasehistory: "주문내역",
 
   전화번호: "전화번호",
+  전화연락처: "전화번호",
   휴대전화번호: "전화번호",
   휴대폰번호: "전화번호",
+  핸드폰번호: "전화번호",
   가입자전화번호: "전화번호",
+  phone: "전화번호",
+  phonenumber: "전화번호",
+  mobile: "전화번호",
+  mobilenumber: "전화번호",
 
   계정정보: "계정정보",
   계정ID: "계정정보",
+  계정아이디: "계정정보",
   로그인정보: "계정정보",
+  아이디: "계정정보",
+  사용자ID: "계정정보",
+  사용자아이디: "계정정보",
+  로그인ID: "계정정보",
+  로그인아이디: "계정정보",
+  회원ID: "계정정보",
+  회원아이디: "계정정보",
+  id: "계정정보",
+  userid: "계정정보",
+  loginid: "계정정보",
+  accountid: "계정정보",
+  memberid: "계정정보",
 
   CI: "CI",
+  ci: "CI",
   연계정보: "CI",
 
   DI: "DI",
+  di: "DI",
   중복가입확인정보: "DI",
 
   통신가입자식별정보: "통신가입자식별정보",
   IMSI: "통신가입자식별정보",
+  imsi: "통신가입자식별정보",
   가입자식별번호: "통신가입자식별정보",
   "가입자식별번호(IMSI)": "통신가입자식별정보",
   국제이동가입자식별번호: "통신가입자식별정보",
 
   IMEI: "IMEI",
+  imei: "IMEI",
   단말기식별번호: "IMEI",
 
   통신인증정보: "통신인증정보",
   유심인증키: "통신인증정보",
   USIM인증키: "통신인증정보",
+  usim인증키: "통신인증정보",
   SIM인증키: "통신인증정보",
+  sim인증키: "통신인증정보",
 
   결제내역: "결제내역",
   결제정보: "결제내역",
@@ -272,10 +327,17 @@ const RISK_ITEM_ALIASES: Record<string, RiskItemKey> = {
   통장계좌번호: "계좌번호",
   은행계좌번호: "계좌번호",
   환불계좌번호: "계좌번호",
+  bankaccount: "계좌번호",
+  bankaccountnumber: "계좌번호",
+  accountnumber: "계좌번호",
 
   카드번호: "카드번호",
   카드정보: "카드번호",
+  신용카드번호: "카드번호",
+  체크카드번호: "카드번호",
   신용카드정보: "카드번호",
+  cardnumber: "카드번호",
+  creditcardnumber: "카드번호",
 
   비밀번호: "비밀번호",
   패스워드: "비밀번호",
@@ -285,9 +347,17 @@ const RISK_ITEM_ALIASES: Record<string, RiskItemKey> = {
   로그인비밀번호: "비밀번호",
   계정비밀번호: "비밀번호",
   계정로그인비밀번호: "비밀번호",
+  password: "비밀번호",
+  passwd: "비밀번호",
+  passcode: "비밀번호",
+  loginpassword: "비밀번호",
+  accountpassword: "비밀번호",
+  accountloginpassword: "비밀번호",
 
   주민등록번호: "주민등록번호",
   주민번호: "주민등록번호",
+  rrn: "주민등록번호",
+  residentregistrationnumber: "주민등록번호",
 
   여권번호: "여권번호",
 
@@ -482,18 +552,33 @@ const MAX_SCORE = 100;
 const HIGH_THRESHOLD = 40;
 const MEDIUM_THRESHOLD = 20;
 
+function normalizeAliasKey(item: string): string {
+  return item
+    .normalize("NFKC")
+    .trim()
+    .replace(/[‐‑‒–—―]/g, "-")
+    .replace(/\s+/g, "")
+    .toLowerCase();
+}
+
 export function normalizeRiskItem(item: string): RiskItemKey | null {
   const normalized = item.replace(/\s/g, "").trim();
-  const alias = RISK_ITEM_ALIASES[normalized];
+  const normalizedAliasKey = normalizeAliasKey(item);
+  const alias =
+    RISK_ITEM_ALIASES[normalized] ??
+    RISK_ITEM_ALIASES[normalizedAliasKey];
 
   if (alias) {
     return alias;
   }
 
   const withoutTrailingParenthetical = normalized.replace(/\([^()]*\)$/, "");
+  const withoutTrailingParentheticalAliasKey =
+    normalizeAliasKey(withoutTrailingParenthetical);
   const aliasWithoutTrailingParenthetical =
     withoutTrailingParenthetical !== normalized
-      ? RISK_ITEM_ALIASES[withoutTrailingParenthetical]
+      ? RISK_ITEM_ALIASES[withoutTrailingParenthetical] ??
+        RISK_ITEM_ALIASES[withoutTrailingParentheticalAliasKey]
       : null;
 
   if (aliasWithoutTrailingParenthetical) {
