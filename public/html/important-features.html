@@ -1,0 +1,259 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>사용자가 가장 중요하게 본 기능</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      min-height: 100vh;
+      margin: 0;
+      display: grid;
+      place-items: center;
+      background: #ffffff;
+      color: #111833;
+      font-family: "Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", Arial, sans-serif;
+    }
+
+    .feature-card {
+      width: min(760px, calc(100vw - 40px));
+      min-height: auto;
+      padding: 0;
+      border: 0;
+      border-radius: 0;
+      background: #ffffff;
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      margin-bottom: 70px;
+    }
+
+    .title-badge {
+      width: 442px;
+      height: 56px;
+      display: grid;
+      place-items: center;
+      margin: 0;
+      border-radius: 10px;
+      color: #ffffff;
+      background: linear-gradient(180deg, #062171 0%, #071a58 100%);
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.16);
+      font-size: 30px;
+      font-weight: 800;
+      letter-spacing: 0;
+    }
+
+    .subtitle {
+      color: #5e6576;
+      font-size: 21px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .features {
+      display: grid;
+      gap: 64px;
+    }
+
+    .feature-row {
+      display: grid;
+      grid-template-columns: 44px 56px 160px 240px 112px;
+      align-items: center;
+      gap: 18px;
+      min-height: 44px;
+    }
+
+    .rank {
+      width: 36px;
+      height: 36px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      color: #ffffff;
+      background: #37a8ad;
+      font-size: 20px;
+      font-weight: 800;
+    }
+
+    .rank-muted {
+      background: #aeb5c7;
+    }
+
+    .icon {
+      width: 52px;
+      height: 52px;
+      color: #0d1c5a;
+    }
+
+    .label {
+      font-size: 25px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .bar {
+      width: 240px;
+      height: 30px;
+      border-radius: 4px;
+      overflow: hidden;
+      background: #f0f1f6;
+      box-shadow: inset 8px 0 12px rgba(15, 24, 60, 0.04);
+    }
+
+    .bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #29989d 0%, #35aeb3 100%);
+      border-radius: 4px 0 0 4px;
+    }
+
+    .bar-50 {
+      width: 100%;
+    }
+
+    .bar-18 {
+      width: 36%;
+    }
+
+    .bar-16 {
+      width: 32%;
+    }
+
+    .value {
+      font-size: 23px;
+      font-weight: 800;
+      color: #121936;
+      white-space: nowrap;
+      text-align: right;
+    }
+
+    @media (max-width: 720px) {
+      .feature-card {
+        padding: 0;
+      }
+
+      .header {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 10px;
+        margin-bottom: 36px;
+      }
+
+      .title-badge {
+        width: 100%;
+        height: auto;
+        min-height: 52px;
+        padding: 8px 12px;
+        font-size: 22px;
+        text-align: center;
+      }
+
+      .subtitle {
+        font-size: 17px;
+      }
+
+      .features {
+        gap: 34px;
+      }
+
+      .feature-row {
+        grid-template-columns: 36px 44px minmax(96px, 1fr);
+        gap: 12px;
+      }
+
+      .icon {
+        width: 42px;
+        height: 42px;
+      }
+
+      .label {
+        font-size: 18px;
+      }
+
+      .bar {
+        grid-column: 2 / 4;
+        width: 100%;
+      }
+
+      .value {
+        grid-column: 2 / 4;
+        font-size: 17px;
+        text-align: left;
+      }
+    }
+  </style>
+</head>
+<body>
+  <section class="feature-card" aria-labelledby="feature-title">
+    <header class="header">
+      <h1 class="title-badge" id="feature-title">사용자가 가장 중요하게 본 기능</h1>
+      <div class="subtitle">단일응답 (응답자: 100명)</div>
+    </header>
+
+    <div class="features" aria-label="중요 기능 순위">
+      <div class="feature-row">
+        <span class="rank">1</span>
+        <svg class="icon" viewBox="0 0 64 64" aria-hidden="true">
+          <g fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="32" cy="32" r="21" />
+            <circle cx="32" cy="32" r="12" />
+            <path d="M32 32l17-17" />
+            <path d="M46 8v12h12" />
+            <path d="M26 18c-9 4-13 15-8 24" />
+            <path d="M39 47c-9 4-20-1-24-10" />
+          </g>
+        </svg>
+        <span class="label">맞춤형 대응</span>
+        <div class="bar"><div class="bar-fill bar-50"></div></div>
+        <span class="value">50명 (50%)</span>
+      </div>
+
+      <div class="feature-row">
+        <span class="rank">2</span>
+        <svg class="icon" viewBox="0 0 64 64" aria-hidden="true">
+          <g fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="14" y="8" width="36" height="48" rx="2" />
+            <path d="M24 20h6M36 20h6M24 31h6M36 31h6M24 42h6M36 42h6" />
+          </g>
+        </svg>
+        <span class="label">유출 이력 관리</span>
+        <div class="bar"><div class="bar-fill bar-18"></div></div>
+        <span class="value">18명 (18%)</span>
+      </div>
+
+      <div class="feature-row">
+        <span class="rank">3</span>
+        <svg class="icon" viewBox="0 0 64 64" aria-hidden="true">
+          <g fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M32 7l22 9v16c0 14-9 22-22 28C19 54 10 46 10 32V16l22-9z" />
+            <path d="M22 32l8 8 15-18" />
+          </g>
+        </svg>
+        <span class="label">피싱 탐지</span>
+        <div class="bar"><div class="bar-fill bar-16"></div></div>
+        <span class="value">16명 (16%)</span>
+      </div>
+
+      <div class="feature-row">
+        <span class="rank rank-muted">4</span>
+        <svg class="icon" viewBox="0 0 64 64" aria-hidden="true">
+          <g fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M24 9c-8 0-13 6-13 13 0 3 1 6 3 8-5 2-8 6-8 12 0 8 7 13 15 13 3 0 6-1 9-3V11c-2-1-4-2-6-2z" />
+            <path d="M40 9c8 0 13 6 13 13 0 3-1 6-3 8 5 2 8 6 8 12 0 8-7 13-15 13-3 0-6-1-9-3V11c2-1 4-2 6-2z" />
+            <path d="M20 26h8M20 39h8M36 25h8M36 40h8" />
+          </g>
+        </svg>
+        <span class="label">AI 위험도 분석</span>
+        <div class="bar"><div class="bar-fill bar-16"></div></div>
+        <span class="value">16명 (16%)</span>
+      </div>
+    </div>
+  </section>
+</body>
+</html>
